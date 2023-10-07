@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="you_should_allow_all_permissions_to_fetch_gallery_images">يجب السماح لجميع الأذونات لرؤية صور المعرض</string>
+    <string name="cancel">إلغاء</string>
+    <string name="settings">الإعدادت</string>
+</resources>

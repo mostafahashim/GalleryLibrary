@@ -1,0 +1,54 @@
+package hashim.gallerylib.adapter
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
+import hashim.gallerylib.view.GalleryBaseActivity
+import hashim.gallerylib.R
+import hashim.gallerylib.databinding.RecyclerBottomSheetAlbumItemBinding
+import hashim.gallerylib.observer.OnBottomSheetItemClickListener
+
+class RecyclerAlbumsBottomSheetAdapter(
+    val albumModels: ArrayList<String>,
+    var onBottomSheetItemClickListener: OnBottomSheetItemClickListener
+) : RecyclerView.Adapter<RecyclerAlbumsBottomSheetAdapter.ViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): RecyclerAlbumsBottomSheetAdapter.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.recycler_bottom_sheet_album_item,
+            parent,
+            false
+        ) as RecyclerBottomSheetAlbumItemBinding
+        return RecyclerAlbumsBottomSheetAdapter.ViewHolder(
+            binding
+        )
+    }
+
+    override fun getItemCount() = albumModels.size
+
+
+    override fun onBindViewHolder(
+        holder: RecyclerAlbumsBottomSheetAdapter.ViewHolder,
+        position: Int
+    ) {
+        var item = albumModels[holder.layoutPosition]
+
+
+        holder.binding.tvBottomSheetItem.text = item
+        holder.itemView.setOnClickListener {
+            onBottomSheetItemClickListener.onBottomSheetItemClickListener(holder.layoutPosition)
+            notifyDataSetChanged()
+        }
+
+    }
+
+    class ViewHolder(var binding: RecyclerBottomSheetAlbumItemBinding) :
+        RecyclerView.ViewHolder(binding.root)
+
+
+}

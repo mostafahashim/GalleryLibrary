@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="hashim.gallerylib.view.galleryActivity.GalleryViewModel" />
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/imgview_back_galleryActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                android:onClick="@{()->viewModel.observer.onBackClicked()}"
+                android:padding="@dimen/padding_20"
+                android:src="@drawable/back_white_icon" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:includeFontPadding="false"
+                android:text="@string/gallery"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_18" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/layout_btns_fromcamera_post_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="@{viewModel.fromCameraContainer?View.VISIBLE:View.GONE}">
+
+                    <ImageView
+                        android:id="@+id/btnCameraphotoapost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                        android:contentDescription="@string/app_name"
+                        android:onClick="@{()->viewModel.observer.captureImage()}"
+                        android:padding="@dimen/padding_18"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/camera_menu_icn"
+                        android:visibility="@{viewModel.btnCameraPhotoVisible?View.VISIBLE:View.GONE}" />
+
+                    <ImageView
+                        android:id="@+id/btnCameravideopost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                        android:contentDescription="@string/app_name"
+                        android:onClick="@{()->viewModel.observer.captureVideo()}"
+                        android:padding="@dimen/padding_18"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/video_menu_icn"
+                        android:visibility="@{viewModel.btnCameraVideoVisible?View.VISIBLE:View.GONE}" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btnGalleryOk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                    android:includeFontPadding="false"
+                    android:onClick="@{()->viewModel.observer.openFinish()}"
+                    android:paddingStart="@dimen/padding_25"
+                    android:paddingTop="@dimen/padding_15"
+                    android:paddingEnd="@dimen/padding_25"
+                    android:paddingBottom="@dimen/padding_15"
+                    android:text="@string/done"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/font_size_20"
+                    android:visibility="@{viewModel.btnDoneVisible?View.VISIBLE:View.GONE}" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tvFoldersDropDown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/padding_7"
+            android:background="@drawable/layout_bg_white_smoke_selector_with_bg_white"
+            android:drawablePadding="@dimen/padding_10"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:onClick="@{()->viewModel.observer.openAlbums()}"
+            android:padding="@dimen/padding_15"
+            android:text="@{viewModel.selectedAlbumName}"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="@dimen/font_size_20"
+            android:visibility="@{viewModel.isHasMedia()?View.VISIBLE:View.GONE}"
+            app:drawableEndCompat="@drawable/drop_down_gray_icon" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcGallery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adapter="@{viewModel.recyclerGalleryAdapter}"
+                android:orientation="vertical"
+                android:visibility="@{viewModel.isHasMedia()?View.VISIBLE:View.GONE}"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="3" />
+
+            <ImageView
+                android:id="@+id/imgNoMedia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/error_ice_creame_icon"
+                android:visibility="@{viewModel.isHasMedia()?View.GONE:View.VISIBLE}" />
+        </RelativeLayout>
+    </LinearLayout>
+</layout>

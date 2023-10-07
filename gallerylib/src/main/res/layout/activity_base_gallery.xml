@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/layoutContainerBaseActivity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/layoutContainerActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <ImageView
+                android:id="@+id/ivbackActionBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                android:padding="15dp"
+                android:src="@drawable/back_black_icon" />
+
+            <TextView
+                android:id="@+id/tv_title_custom_action_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/ivbackActionBar"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:padding="10dp"
+                android:text="@string/app_name"
+                android:textColor="@color/black"
+                android:textSize="18dp" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/baseFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</layout>

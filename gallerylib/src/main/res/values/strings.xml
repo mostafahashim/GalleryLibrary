@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="you_should_allow_all_permissions_to_fetch_gallery_images">You should allow all permissions to fetch gallery images</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings">Settings</string>
+</resources>

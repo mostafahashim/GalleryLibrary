@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <shape>
+            <corners android:topLeftRadius="40dp" android:topRightRadius="40dp" />
+
+            <solid android:color="@color/white" />
+            <stroke android:width="0dp" android:color="@color/gainsboro_1" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:topLeftRadius="40dp" android:topRightRadius="40dp" />
+
+            <solid android:color="@color/white" />
+            <stroke android:width="0dp" android:color="@color/gainsboro_1" />
+        </shape>
+    </item>
+
+</selector>
