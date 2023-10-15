@@ -44,8 +44,7 @@ class RecyclerGalleryAdapter(
 
     fun setList(list: ArrayList<GalleryModel>) {
         models = list
-        notifyItemRangeRemoved(0, models.size)
-        notifyItemRangeChanged(0, models.size)
+        notifyDataSetChanged()
     }
 
 

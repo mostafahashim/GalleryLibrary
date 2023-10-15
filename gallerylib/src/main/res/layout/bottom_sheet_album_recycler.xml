@@ -6,11 +6,7 @@
         android:id="@+id/layoutInternal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:behavior_hideable="true"
-        app:behavior_peekHeight="@dimen/padding_100"
-        app:behavior_skipCollapsed="true"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -55,7 +51,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcBottomSheet"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/padding_500" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 

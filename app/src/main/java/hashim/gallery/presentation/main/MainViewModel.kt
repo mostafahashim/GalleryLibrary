@@ -1,5 +1,6 @@
 package hashim.gallery.presentation.main
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hashim.gallery.adapter.RecyclerGalleryAdapter
 import hashim.gallerylib.model.GalleryModel
@@ -9,6 +10,7 @@ class MainViewModel : ViewModel() {
     var galleryModels: ArrayList<GalleryModel> = ArrayList()
 
     var recyclerGalleryAdapter: RecyclerGalleryAdapter
+    var isDialog = MutableLiveData(true)
 
     init {
         recyclerGalleryAdapter = RecyclerGalleryAdapter(galleryModels)

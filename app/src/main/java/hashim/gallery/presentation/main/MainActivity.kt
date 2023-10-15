@@ -2,7 +2,6 @@ package hashim.gallery.presentation.main
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -17,8 +16,9 @@ import hashim.gallery.databinding.ActivityMainBinding
 import hashim.gallery.util.LocaleHelper
 import hashim.gallery.util.Preferences
 import hashim.gallerylib.model.GalleryModel
+import hashim.gallerylib.observer.OnResultCallback
 import hashim.gallerylib.util.GalleryConstants
-import hashim.gallerylib.view.galleryActivity.GalleryActivity
+import hashim.gallerylib.view.galleryActivity.GalleryLib
 import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity(), MainViewModel.Observer {
@@ -71,18 +71,28 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
     }
 
     override fun openGallery() {
-        Intent(this, GalleryActivity::class.java).also {
-            it.putExtra(GalleryConstants.maxSelectionCount, 4)
-            it.putExtra(GalleryConstants.showType, GalleryConstants.GalleryTypeImages)
-            val galleryModels = ArrayList<GalleryModel>()
-            galleryModels.addAll(binding.viewModel!!.galleryModels)
-            it.putExtra(GalleryConstants.selected, galleryModels)
-            it.putExtra(GalleryConstants.Language, Preferences.getApplicationLocale())
-            galleryResultLauncher.launch(it)
-        }
+        val galleryModels = ArrayList<GalleryModel>()
+        galleryModels.addAll(binding.viewModel!!.galleryModels)
+
+        GalleryLib(this).showGallery(
+            isDialog = binding.viewModel?.isDialog?.value ?: false,
+            selectionType = GalleryConstants.GalleryTypeImages,
+            locale = Preferences.getApplicationLocale(),
+            maxSelectionCount = 40,
+            selected = galleryModels,
+            onResultCallback = object : OnResultCallback {
+                override fun onResult(list: ArrayList<GalleryModel>) {
+                    binding.viewModel?.galleryModels = list
+                    binding.viewModel?.recyclerGalleryAdapter?.setList(
+                        binding.viewModel?.galleryModels ?: ArrayList()
+                    )
+                }
+            },
+            galleryResultLauncher = galleryResultLauncher
+        )
     }
 
-    private var galleryResultLauncher =
+    val galleryResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK
             ) {
@@ -104,6 +114,5 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
                 }
             }
         }
-
 
 }

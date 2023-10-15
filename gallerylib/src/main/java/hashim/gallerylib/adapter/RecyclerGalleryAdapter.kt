@@ -3,6 +3,9 @@ package hashim.gallerylib.adapter
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -68,6 +71,7 @@ class RecyclerGalleryAdapter(
             changeSelection(holder.layoutPosition)
             onItemSelectedListener.onItemSelectedListener(0)
         }
+
     }
 
     fun getSelected(): ArrayList<GalleryModel> {
@@ -112,7 +116,7 @@ class RecyclerGalleryAdapter(
         notifyItemInserted(0)
     }
 
-    private fun changeSelection(position: Int) {
+    fun changeSelection(position: Int) {
         //get index in original before edit in item
         val indexInOriginal = originalGalleryModels.indexOf(filteredGalleryModels[position])
         if (filteredGalleryModels[position].isSelected) {
@@ -192,7 +196,8 @@ class RecyclerGalleryAdapter(
                 Toast.makeText(
                     context,
                     context.getString(
-                        R.string.you_may_not_select_more_than_s_item, maxSelectionCount.toString()),
+                        R.string.you_may_not_select_more_than_s_item, maxSelectionCount.toString()
+                    ),
                     Toast.LENGTH_LONG
                 ).show()
             }

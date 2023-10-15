@@ -522,11 +522,23 @@ class GalleryViewModel : ViewModel() {
         } else {
             //media found
             isHasMedia.value = true
-            //select album if one item selected, else select all albums
-            if (selectedPhotos.size == 1) {
-                recyclerGalleryAdapter.filter(selectedPhotos[0].albumName)
+            //select album if all selected items in one album, else select all albums
+            if (selectedPhotos.isEmpty()) {
+                selectedAlbumName.value = context.getString(R.string.all)
+                return
+            }
+            val albumName = selectedPhotos[0].albumName
+            var sameAlbum = true
+            for (i in selectedPhotos.indices) {
+                if (selectedPhotos[i].albumName.compareTo(albumName) != 0) {
+                    sameAlbum = false
+                    break
+                }
+            }
+            if (sameAlbum) {
+                recyclerGalleryAdapter.filter(albumName)
                 //change album name in dropdown
-                selectedAlbumName.value = selectedPhotos[0].albumName
+                selectedAlbumName.value = albumName
             } else {
                 selectedAlbumName.value = context.getString(R.string.all)
             }

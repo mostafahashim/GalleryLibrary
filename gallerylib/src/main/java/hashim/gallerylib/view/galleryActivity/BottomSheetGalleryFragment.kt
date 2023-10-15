@@ -1,82 +1,133 @@
 package hashim.gallerylib.view.galleryActivity
 
-
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import android.view.MotionEvent
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import hashim.gallerylib.R
-import hashim.gallerylib.databinding.ActivityGalleryBinding
+import hashim.gallerylib.databinding.BottomSheetGalleryBinding
 import hashim.gallerylib.model.ComparableGalleryModel
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnBottomSheetItemClickListener
+import hashim.gallerylib.observer.OnResultCallback
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
-import hashim.gallerylib.view.GalleryBaseActivity
 import hashim.gallerylib.view.cameraActivity.CustomCameraActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
 import java.io.File
-import java.util.*
+import java.util.Collections
 
+class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel.Observer {
 
-class GalleryActivity : GalleryBaseActivity(
-    R.string.gallery, false, true, true, false,
-    false, true, true
-), GalleryViewModel.Observer {
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is AppCompatActivity)
+            activity = context
+    }
 
-    lateinit var binding: ActivityGalleryBinding
+    lateinit var activity: AppCompatActivity
+    lateinit var binding: BottomSheetGalleryBinding
 
-    override fun doOnCreate(arg0: Bundle?) {
-        binding = putContentView(R.layout.activity_gallery) as ActivityGalleryBinding
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // Inflate the layout for this fragment
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.bottom_sheet_gallery,
+                container,
+                false
+            )
+        binding.lifecycleOwner = this
+        dialog?.setOnShowListener {
+        }
         binding.viewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
         binding.viewModel?.observer = this
         binding.lifecycleOwner = this
-        initializeViews()
-        setListener()
+        return binding.root
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun initializeViews() {
-        binding.viewModel?.selectedPhotos =
-            intent.extras!!.get(GalleryConstants.selected) as ArrayList<GalleryModel>
-        binding.viewModel?.maxSelectionCount =
-            intent.getIntExtra(GalleryConstants.maxSelectionCount, 50)
-        binding.viewModel?.showType =
-            intent.getStringExtra(GalleryConstants.showType) ?: GalleryConstants.GalleryTypeImages
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(STYLE_NORMAL, R.style.AppBottomSheetDialogTheme)
+    }
 
-        binding.viewModel?.initGalleryAdapter(ScreenSizeUtils().getScreenWidth(this))
+    lateinit var onResultCallback: OnResultCallback
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.viewModel?.selectedPhotos =
+            requireArguments()[GalleryConstants.selected] as ArrayList<GalleryModel>
+        binding.viewModel?.maxSelectionCount =
+            requireArguments().getInt(GalleryConstants.maxSelectionCount, 50)
+        binding.viewModel?.showType = requireArguments().getString(
+            GalleryConstants.showType,
+            GalleryConstants.GalleryTypeImages
+        )
+
+        binding.viewModel?.initGalleryAdapter(ScreenSizeUtils().getScreenWidth(activity))
 //        binding.viewModel?.updateBooksAdapterColumnWidth(ScreenSizeUtils().getScreenWidth(this))
         binding.viewModel?.initializeCameraButtons()
         fetchData()
-    }
 
-    override fun setListener() {
-
+        binding.imgviewBackGalleryActivity.setOnClickListener {
+            dismissAllowingStateLoss()
+        }
     }
 
     override fun openFinish() {
         binding.viewModel?.selectedPhotos =
             binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
         getIntentForSelectedItems(binding.viewModel?.selectedPhotos)
-        finish_activity()
+        dismissAllowingStateLoss()
+    }
+
+    override fun onBackClicked() {
+        binding.viewModel?.selectedPhotos =
+            binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
+//        onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+        dismissAllowingStateLoss()
+    }
+
+    private fun getIntentForSelectedItems(
+        selected: ArrayList<GalleryModel>?
+    ) {
+        // sort list as selected index
+        if (selected != null) {
+            Collections.sort(
+                selected,
+                ComparableGalleryModel.instance.compareIndex_when_selected
+            )
+        }
+        val intent = Intent()
+        intent.putExtra(GalleryConstants.selected, selected)
+        onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+//        setResult(AppCompatActivity.RESULT_OK, intent)
     }
 
     override fun openAlbums() {
@@ -100,25 +151,20 @@ class GalleryActivity : GalleryBaseActivity(
                 binding.rcGallery.scrollToPosition(0)
             }
         })
-        bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
+        bottomSheetFragment.show(activity.supportFragmentManager, bottomSheetFragment.tag)
     }
-
-    override fun onBackClicked() {
-        binding.viewModel?.selectedPhotos =
-            binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
-        finish_activity()
-    }
-
 
     private fun fetchData() {
         if (checkPermissions())
             Handler(Looper.getMainLooper()).post {
                 binding.viewModel?.recyclerGalleryAdapter?.addAll(
-                    binding.viewModel?.getGalleryPhotosAndVideos(this as Context) ?: ArrayList()
+                    binding.viewModel?.getGalleryPhotosAndVideos(activity)
+                        ?: ArrayList()
                 )
-                binding.viewModel?.checkImageStatus(this)
+                binding.viewModel?.checkImageStatus(activity)
             }
     }
+
 
     var PERMISSIONS = ArrayList<String>()
     fun hasPermissions(context: Context?, permissions: Array<String>): Boolean {
@@ -151,7 +197,7 @@ class GalleryActivity : GalleryBaseActivity(
         }
 
         if (Build.VERSION.SDK_INT >= 23 && !hasPermissions(
-                this@GalleryActivity,
+                activity,
                 PERMISSIONS.toTypedArray()
             )
         ) {
@@ -162,10 +208,6 @@ class GalleryActivity : GalleryBaseActivity(
             return false
         }
         return true
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onRequestPermissionsResult(
@@ -180,7 +222,7 @@ class GalleryActivity : GalleryBaseActivity(
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     fetchData()
                 } else {
-                    MaterialAlertDialogBuilder(this)
+                    MaterialAlertDialogBuilder(activity)
                         .setMessage(getString(R.string.you_should_allow_all_permissions_to_fetch_gallery_images))
                         .setPositiveButton(getString(R.string.settings)) { dialog, which ->
                             // Respond to positive button press
@@ -188,7 +230,7 @@ class GalleryActivity : GalleryBaseActivity(
                             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                             val uri = Uri.fromParts(
                                 "package",
-                                packageName, null
+                                activity.packageName, null
                             )
                             intent.data = uri
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -213,7 +255,7 @@ class GalleryActivity : GalleryBaseActivity(
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
         binding.viewModel?.tempCaptueredFile =
             DataProvider()
-                .getFile(GalleryConstants.TYPE_VIDEO_INTERNAL, applicationContext)
+                .getFile(GalleryConstants.TYPE_VIDEO_INTERNAL, activity)
         val videoTimeInMinutes = 1 * 60
         intent.putExtra(
             MediaStore.EXTRA_DURATION_LIMIT,
@@ -222,8 +264,8 @@ class GalleryActivity : GalleryBaseActivity(
 
         val mVideoUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             FileProvider.getUriForFile(
-                this,
-                applicationContext.packageName + ".provider",
+                activity,
+                activity.packageName + ".provider",
                 binding.viewModel?.tempCaptueredFile!!
             )
         } else {
@@ -244,18 +286,18 @@ class GalleryActivity : GalleryBaseActivity(
                     // Tell the media scanner about the new file so that it is
                     // immediately available to the user.
                     MediaScannerConnection.scanFile(
-                        this,
+                        activity,
                         arrayOf(binding.viewModel?.tempCaptueredFile.toString()), null
                     ) { _, uri ->
-                        runOnUiThread {
+                        activity.runOnUiThread {
                             val newUri = uri
                                 ?: if (result.data != null && result.data?.data != null) {
                                     result.data?.data!!
                                 } else {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                         FileProvider.getUriForFile(
-                                            this,
-                                            applicationContext.packageName + ".provider",
+                                            activity,
+                                            activity.packageName + ".provider",
                                             binding.viewModel?.tempCaptueredFile!!
                                         )
                                     } else {
@@ -263,7 +305,7 @@ class GalleryActivity : GalleryBaseActivity(
                                     }
                                 }
                             val galleryModel =
-                                binding.viewModel?.getLastCapturedGalleryVideo(this, newUri)
+                                binding.viewModel?.getLastCapturedGalleryVideo(activity, newUri)
                             if (galleryModel != null) {
                                 binding.viewModel?.selectedAlbumName?.value =
                                     getString(R.string.all)
@@ -274,7 +316,7 @@ class GalleryActivity : GalleryBaseActivity(
                                 binding.viewModel?.showHideButtonDone(true)
                             } else {
                                 Toast.makeText(
-                                    applicationContext,
+                                    activity,
                                     R.string.error_while_capture_the_photo_or_video_empty_file,
                                     Toast.LENGTH_LONG
                                 ).show()
@@ -286,7 +328,7 @@ class GalleryActivity : GalleryBaseActivity(
                     Log.e("videoError", e.message!!)
                     e.printStackTrace()
                     Toast.makeText(
-                        this@GalleryActivity,
+                        activity,
                         R.string.error_while_capture_the_photo_or_video_empty_file,
                         Toast.LENGTH_LONG
                     ).show()
@@ -298,7 +340,7 @@ class GalleryActivity : GalleryBaseActivity(
     override fun captureImage() {
         if (!checkPermissions())
             return
-        val intent = Intent(this@GalleryActivity, CustomCameraActivity::class.java)
+        val intent = Intent(activity, CustomCameraActivity::class.java)
         imageResultLauncher.launch(intent)
     }
 
@@ -311,21 +353,21 @@ class GalleryActivity : GalleryBaseActivity(
 
                 val fileImage = result.data?.extras?.get("ImageFile") as File
                 MediaScannerConnection.scanFile(
-                    this,
+                    activity,
                     arrayOf(fileImage.toString()), null
                 ) { _, _ ->
-                    runOnUiThread {
+                    activity.runOnUiThread {
                         try {
                             // prepare model to send it
                             val customGalleryModel =
                                 GalleryModel()
                             customGalleryModel.index_when_selected = 1
                             val itemUrI = DataProvider().getImageURI(
-                                applicationContext, fileImage.path
+                                activity, fileImage.path
                             )
                             val newUri = Uri.parse(itemUrI)
                             val galleryModel =
-                                binding.viewModel?.getLastCapturedGalleryImage(this, newUri)
+                                binding.viewModel?.getLastCapturedGalleryImage(activity, newUri)
                             if (galleryModel != null) {
                                 binding.viewModel?.selectedAlbumName?.value =
                                     getString(R.string.all)
@@ -338,14 +380,14 @@ class GalleryActivity : GalleryBaseActivity(
                                 binding.viewModel?.showHideButtonDone(true)
                             } else {
                                 Toast.makeText(
-                                    applicationContext,
+                                    activity,
                                     R.string.error_while_capture_the_photo_or_video_empty_file,
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
                         } catch (e: Exception) {
                             Toast.makeText(
-                                applicationContext,
+                                activity,
                                 R.string.error_while_capture_the_photo_or_video_empty_file,
                                 Toast.LENGTH_LONG
                             ).show()
@@ -355,23 +397,4 @@ class GalleryActivity : GalleryBaseActivity(
             }
         }
 
-    private fun getIntentForSelectedItems(
-        selected: ArrayList<GalleryModel>?
-    ) {
-        // sort list as selected index
-        if (selected != null) {
-            Collections.sort(
-                selected,
-                ComparableGalleryModel.instance.compareIndex_when_selected
-            )
-        }
-        val intent = Intent()
-        intent.putExtra(GalleryConstants.selected, selected)
-        setResult(RESULT_OK, intent)
-    }
-
-    override fun onBackPressed() {
-        finish_activity()
-        super.onBackPressed()
-    }
 }

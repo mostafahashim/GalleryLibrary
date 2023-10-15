@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,17 +21,17 @@ class BottomSheetAlbumsFragment : BottomSheetDialogFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is GalleryBaseActivity)
+        if (context is AppCompatActivity)
             activity = context
     }
 
-    lateinit var activity: GalleryBaseActivity
+    lateinit var activity: AppCompatActivity
     lateinit var binding: BottomSheetAlbumRecyclerBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding =
             DataBindingUtil.inflate(
@@ -58,20 +59,20 @@ class BottomSheetAlbumsFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        var arrayList = requireArguments()["AlbumModels"] as ArrayList<String>
-        var title = requireArguments()["title"] as String
+        val arrayList = requireArguments()["AlbumModels"] as ArrayList<String>
+        val title = requireArguments()["title"] as String
         binding.tvLabelBottomSheet.text = title
 
         binding.rcBottomSheet.layoutManager =
             LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-        var myAdapter = RecyclerAlbumsBottomSheetAdapter(
-                arrayList,
-                object : OnBottomSheetItemClickListener {
-                    override fun onBottomSheetItemClickListener(position: Int) {
-                        onBottomSheetItemClickListener.onBottomSheetItemClickListener(position)
-                        dismiss()
-                    }
-                })
+        val myAdapter = RecyclerAlbumsBottomSheetAdapter(
+            arrayList,
+            object : OnBottomSheetItemClickListener {
+                override fun onBottomSheetItemClickListener(position: Int) {
+                    onBottomSheetItemClickListener.onBottomSheetItemClickListener(position)
+                    dismiss()
+                }
+            })
         binding.rcBottomSheet.adapter = myAdapter
         binding.ivCloseBottomSheet.setOnClickListener {
             dismissAllowingStateLoss()

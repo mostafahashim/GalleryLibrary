@@ -11,26 +11,35 @@
             type="hashim.gallery.presentation.main.MainViewModel" />
     </data>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_30"
+            android:checked="@={viewModel.isDialog}"
+            android:text="@string/is_dialog"
+            android:textColor="@color/black" />
 
         <Button
             android:id="@+id/btnOpenGallery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/padding_50"
+            android:layout_marginTop="@dimen/padding_20"
             android:onClick="@{()->viewModel.observer.openGallery()}"
-            android:text="@string/open_gallery" />
+            android:text="@string/open_gallery"
+            android:textColor="@color/black" />
 
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcGallery"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/btnOpenGallery"
             android:layout_marginTop="@dimen/padding_20"
             android:adapter="@{viewModel.recyclerGalleryAdapter}"
             android:orientation="vertical"
@@ -39,6 +48,6 @@
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="3" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </layout>

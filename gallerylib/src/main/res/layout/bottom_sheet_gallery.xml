@@ -11,11 +11,12 @@
             type="hashim.gallerylib.view.galleryActivity.GalleryViewModel" />
     </data>
 
-    <LinearLayout
+    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/gray"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:behavior_peekHeight="@dimen/padding_100">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -31,19 +32,9 @@
                 android:adjustViewBounds="true"
                 android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
                 android:onClick="@{()->viewModel.observer.onBackClicked()}"
-                android:padding="@dimen/padding_12"
-                android:src="@drawable/back_white_icon"
+                android:padding="@dimen/padding_14"
+                android:src="@drawable/close_black_icon"
                 app:tint="@color/black" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:includeFontPadding="false"
-                android:text="@string/gallery"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_18" />
 
             <TextView
                 android:id="@+id/tvFoldersDropDown"
@@ -84,6 +75,7 @@
                         android:id="@+id/btnCameraphotoapost"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
                         android:contentDescription="@string/app_name"
                         android:onClick="@{()->viewModel.observer.captureImage()}"
@@ -97,6 +89,7 @@
                         android:id="@+id/btnCameravideopost"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
                         android:contentDescription="@string/app_name"
                         android:onClick="@{()->viewModel.observer.captureVideo()}"
@@ -120,6 +113,7 @@
                     android:src="@drawable/done_white_icon"
                     android:visibility="@{viewModel.btnDoneVisible?View.VISIBLE:View.GONE}"
                     app:tint="@color/black" />
+
             </LinearLayout>
         </RelativeLayout>
 
@@ -149,4 +143,6 @@
                 android:visibility="@{viewModel.isHasMedia()?View.GONE:View.VISIBLE}" />
         </RelativeLayout>
     </LinearLayout>
+
+
 </layout>
