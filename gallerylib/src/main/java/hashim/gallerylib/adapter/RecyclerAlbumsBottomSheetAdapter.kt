@@ -16,7 +16,7 @@ class RecyclerAlbumsBottomSheetAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): RecyclerAlbumsBottomSheetAdapter.ViewHolder {
+    ): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = DataBindingUtil.inflate(
             inflater,
@@ -24,7 +24,7 @@ class RecyclerAlbumsBottomSheetAdapter(
             parent,
             false
         ) as RecyclerBottomSheetAlbumItemBinding
-        return RecyclerAlbumsBottomSheetAdapter.ViewHolder(
+        return ViewHolder(
             binding
         )
     }
@@ -33,16 +33,15 @@ class RecyclerAlbumsBottomSheetAdapter(
 
 
     override fun onBindViewHolder(
-        holder: RecyclerAlbumsBottomSheetAdapter.ViewHolder,
+        holder: ViewHolder,
         position: Int
     ) {
-        var item = albumModels[holder.layoutPosition]
+        val item = albumModels[holder.layoutPosition]
 
 
-        holder.binding.tvBottomSheetItem.text = item
+        holder.binding.model = item
         holder.itemView.setOnClickListener {
             onBottomSheetItemClickListener.onBottomSheetItemClickListener(holder.layoutPosition)
-            notifyDataSetChanged()
         }
 
     }

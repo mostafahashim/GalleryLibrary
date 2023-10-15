@@ -130,6 +130,8 @@
                 android:layout_height="match_parent"
                 android:adapter="@{viewModel.recyclerGalleryAdapter}"
                 android:orientation="vertical"
+                android:paddingStart="@dimen/padding_10"
+                android:paddingEnd="@dimen/padding_10"
                 android:visibility="@{viewModel.isHasMedia()?View.VISIBLE:View.GONE}"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3" />

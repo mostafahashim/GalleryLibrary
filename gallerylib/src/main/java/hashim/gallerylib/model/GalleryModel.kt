@@ -16,6 +16,7 @@ class GalleryModel : Serializable {
     var isDeleted: Boolean = false
     var isSelected = false
     var type = ""
+    var isVideo = false
     var albumName = ""
     var index_when_selected = 0
     var item_date_modified = 0

@@ -1,15 +1,18 @@
-package hashim.gallery
+package hashim.gallery.presentation.main
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import hashim.gallery.MyApplication
+import hashim.gallery.R
 import hashim.gallery.databinding.ActivityMainBinding
 import hashim.gallery.util.LocaleHelper
 import hashim.gallery.util.Preferences
@@ -18,7 +21,7 @@ import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.view.galleryActivity.GalleryActivity
 import kotlin.properties.Delegates
 
-class MainActivity : AppCompatActivity(),MainViewModel.Observer {
+class MainActivity : AppCompatActivity(), MainViewModel.Observer {
 
     lateinit var binding: ActivityMainBinding
     var application: MyApplication by Delegates.notNull()
@@ -69,30 +72,38 @@ class MainActivity : AppCompatActivity(),MainViewModel.Observer {
 
     override fun openGallery() {
         Intent(this, GalleryActivity::class.java).also {
-            it.putExtra(GalleryConstants.maxSelectionCount, 1)
-            it.putExtra(GalleryConstants.showType, GalleryConstants.GalleryTypeImagesAndVideos)
-            var galleryModels = ArrayList<GalleryModel>()
-            if (binding.viewModel?.isGalleryModelInitialized()!!)
-                galleryModels.add(binding.viewModel!!.galleryModel!!)
+            it.putExtra(GalleryConstants.maxSelectionCount, 4)
+            it.putExtra(GalleryConstants.showType, GalleryConstants.GalleryTypeImages)
+            val galleryModels = ArrayList<GalleryModel>()
+            galleryModels.addAll(binding.viewModel!!.galleryModels)
             it.putExtra(GalleryConstants.selected, galleryModels)
             it.putExtra(GalleryConstants.Language, Preferences.getApplicationLocale())
             galleryResultLauncher.launch(it)
         }
     }
 
-    var galleryResultLauncher =
+    private var galleryResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK
             ) {
                 //back from gallery activity
-                var galleryModels =
-                    result.data?.extras?.get(GalleryConstants.selected) as ArrayList<GalleryModel>
-                if (!galleryModels.isNullOrEmpty()) {
-                    binding.viewModel?.galleryModel = galleryModels[0]
-                    binding.viewModel?.avatar?.value =
-                        "file://${binding.viewModel?.galleryModel?.sdcardPath}"
+                val galleryModels =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        result.data?.extras?.getParcelableArrayList(
+                            GalleryConstants.selected,
+                            GalleryModel::class.java
+                        ) as ArrayList<GalleryModel>
+                    } else {
+                        result.data?.extras?.get(GalleryConstants.selected) as ArrayList<*>
+                    }
+                if (galleryModels.isNotEmpty()) {
+                    binding.viewModel?.galleryModels = galleryModels as ArrayList<GalleryModel>
+                    binding.viewModel?.recyclerGalleryAdapter?.setList(
+                        binding.viewModel?.galleryModels ?: ArrayList()
+                    )
                 }
             }
         }
+
 
 }

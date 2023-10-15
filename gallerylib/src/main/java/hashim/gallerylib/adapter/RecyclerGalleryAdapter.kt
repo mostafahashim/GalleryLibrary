@@ -3,23 +3,15 @@ package hashim.gallerylib.adapter
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.MultiTransformation
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.request.RequestOptions
 import hashim.gallerylib.R
 import hashim.gallerylib.databinding.ItemRecyclerGalleryBinding
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnItemSelectedListener
 import hashim.gallerylib.util.GalleryConstants
-import hashim.gallerylib.view.galleryActivity.GalleryActivity
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -56,60 +48,22 @@ class RecyclerGalleryAdapter(
     override fun getItemCount() = filteredGalleryModels.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (columnWidth != 0.0) {
-            holder.binding.galleryItemContainer.layoutParams.height = columnWidth.toInt()
-            holder.binding.galleryItemContainer.layoutParams.width = columnWidth.toInt()
-            holder.binding.galleryItemContainer.requestLayout()
-        }
-        var galleryModel = filteredGalleryModels[holder.layoutPosition]
-        try {
-            if (galleryModel.type.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
-                Glide.with(context).load("file://" + galleryModel.sdcardPath)
-                    .apply(
-                        RequestOptions.bitmapTransform(
-                            MultiTransformation(
-                                CenterCrop(),
-                                RoundedCornersTransformation(
-                                    10, 0,
-                                    RoundedCornersTransformation.CornerType.ALL
-                                )
-                            )
-                        ).diskCacheStrategy(DiskCacheStrategy.ALL)
-                    )
-                    .into(holder.binding.imgQueueMultiSelected)
-                holder.binding.imgQueueMultiSelectedThumbnail.visibility = View.INVISIBLE
-            } else if (galleryModel.type.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
-                Glide.with(context).load(Uri.fromFile(File(galleryModel.sdcardPath)))
-                    .apply(
-                        RequestOptions.bitmapTransform(
-                            MultiTransformation(
-                                CenterCrop(),
-                                RoundedCornersTransformation(
-                                    20, 0,
-                                    RoundedCornersTransformation.CornerType.ALL
-                                )
-                            )
-                        ).diskCacheStrategy(DiskCacheStrategy.ALL)
-                    )
-                    .thumbnail(.1f)
-                    .into(holder.binding.imgQueueMultiSelected)
-                holder.binding.imgQueueMultiSelectedThumbnail.visibility = View.VISIBLE
-            }
-            if (galleryModel.isSelected) {
-                holder.binding.galleryItemContainer.setPadding(3, 3, 3, 3)
-                holder.binding.galleryItemContainer
-                    .setBackgroundResource(R.drawable.round_courner_with_bg_color_primary_with_stroke)
-                holder.binding.imgviewCounter.visibility = View.VISIBLE
-            } else {
-                holder.binding.galleryItemContainer
-                    .setBackgroundResource(R.drawable.round_courner_with_bg_white_stroke_gray)
-                holder.binding.galleryItemContainer.setPadding(1, 1, 1, 1)
-                holder.binding.imgviewCounter.visibility = View.GONE
-            }
+        filteredGalleryModels[holder.layoutPosition].columnWidth = columnWidth
+        filteredGalleryModels[holder.layoutPosition].columnHeight = columnWidth
 
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if (filteredGalleryModels[holder.layoutPosition].type.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
+            //image type
+            filteredGalleryModels[holder.layoutPosition].url =
+                "file://" + filteredGalleryModels[holder.layoutPosition].sdcardPath
+            filteredGalleryModels[holder.layoutPosition].isVideo = false
+        } else if (filteredGalleryModels[holder.layoutPosition].type.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
+            //video type
+            filteredGalleryModels[holder.layoutPosition].url =
+                Uri.fromFile(File(filteredGalleryModels[holder.layoutPosition].sdcardPath))
+                    .toString()
+            filteredGalleryModels[holder.layoutPosition].isVideo = true
         }
+        holder.binding.model = filteredGalleryModels[holder.layoutPosition]
         holder.binding.galleryItemContainer.setOnClickListener {
             changeSelection(holder.layoutPosition)
             onItemSelectedListener.onItemSelectedListener(0)
@@ -135,18 +89,18 @@ class RecyclerGalleryAdapter(
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        notifyDataSetChanged()
+        notifyItemRangeInserted(0, filteredGalleryModels.size)
     }
 
     fun addItemToTop(file: GalleryModel) {
         try {
-            if (originalGalleryModels != null && originalGalleryModels.isNotEmpty())
+            if (originalGalleryModels.isNotEmpty())
                 originalGalleryModels.add(0, file)
             else {
                 originalGalleryModels = ArrayList()
                 originalGalleryModels.add(0, file)
             }
-            if (filteredGalleryModels != null && filteredGalleryModels.isNotEmpty())
+            if (filteredGalleryModels.isNotEmpty())
                 filteredGalleryModels.add(0, file)
             else {
                 filteredGalleryModels = ArrayList()
@@ -155,12 +109,12 @@ class RecyclerGalleryAdapter(
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        notifyDataSetChanged()
+        notifyItemInserted(0)
     }
 
     private fun changeSelection(position: Int) {
         //get index in original before edit in item
-        var indexInOriginal = originalGalleryModels.indexOf(filteredGalleryModels[position])
+        val indexInOriginal = originalGalleryModels.indexOf(filteredGalleryModels[position])
         if (filteredGalleryModels[position].isSelected) {
             //deselect item
             filteredGalleryModels[position].isSelected = false
@@ -170,6 +124,8 @@ class RecyclerGalleryAdapter(
             if (getSelected().isEmpty()) {
                 selectedType = ""
             }
+            //update view
+            notifyItemChanged(position)
         } else {
             if (maxSelectionCount == 1) {
                 // one item is selected before
@@ -179,6 +135,8 @@ class RecyclerGalleryAdapter(
                 selectedType = filteredGalleryModels[position].type
                 //change selection in original list
                 originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
+                //update view
+                notifyItemChanged(position)
             } else if (getSelected().size < maxSelectionCount) {
                 if (filteredGalleryModels[position].type.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
                     if (selectedType == GalleryConstants.GalleryTypeImages || selectedType == "") {
@@ -188,6 +146,8 @@ class RecyclerGalleryAdapter(
                         selectedType = filteredGalleryModels[position].type
                         //change selection in original list
                         originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
+                        //update view
+                        notifyItemChanged(position)
                     } else {
                         // video is selected before
                         Toast.makeText(
@@ -204,6 +164,8 @@ class RecyclerGalleryAdapter(
                             filteredGalleryModels[position].index_when_selected =
                                 getSelected().size + 1
                             selectedType = filteredGalleryModels[position].type
+                            //update view
+                            notifyItemChanged(position)
                         } else {
                             // one video is selected before
                             deselectAll()
@@ -212,6 +174,8 @@ class RecyclerGalleryAdapter(
                             filteredGalleryModels[position].index_when_selected =
                                 getSelected().size + 1
                             selectedType = filteredGalleryModels[position].type
+                            //update view
+                            notifyItemChanged(position)
                         }
                         //change selection in original list
                         originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
@@ -227,48 +191,51 @@ class RecyclerGalleryAdapter(
             } else {
                 Toast.makeText(
                     context,
-                    "${context.getString(R.string.you_may_not_select_more_than)} $maxSelectionCount ${
-                        context.getString(
-                            R.string.item
-                        )
-                    }",
+                    context.getString(
+                        R.string.you_may_not_select_more_than_s_item, maxSelectionCount.toString()),
                     Toast.LENGTH_LONG
                 ).show()
             }
         }
-        notifyDataSetChanged()
     }
 
     fun deselectAll() {
-        for (i in originalGalleryModels.indices) {
-            originalGalleryModels[i].index_when_selected = 0
-            originalGalleryModels[i].isSelected = false
-        }
         for (i in filteredGalleryModels.indices) {
-            filteredGalleryModels[i].index_when_selected = 0
-            filteredGalleryModels[i].isSelected = false
+            if (filteredGalleryModels[i].isSelected) {
+                filteredGalleryModels[i].index_when_selected = 0
+                filteredGalleryModels[i].isSelected = false
+                notifyItemChanged(i)
+            }
+        }
+        for (i in originalGalleryModels.indices) {
+            if (originalGalleryModels[i].isSelected) {
+                originalGalleryModels[i].isSelected = false
+                originalGalleryModels[i].index_when_selected = 0
+            }
         }
     }
 
     // Filter Class
     fun filter(charText: String) {
-        var charText = charText
-        charText = charText.lowercase(Locale.getDefault())
+        var albumName = charText
+        albumName = albumName.lowercase(Locale.getDefault())
+        val size = filteredGalleryModels.size
         filteredGalleryModels.clear()
-        if (charText.isEmpty()) {
+        notifyItemRangeRemoved(0, size - 1)
+        if (albumName.isEmpty()) {
             filteredGalleryModels.addAll(originalGalleryModels)
         } else {
             for (galleryModel in originalGalleryModels) {
-                if (galleryModel.albumName.lowercase(Locale.getDefault()).contains(charText)
+                if (galleryModel.albumName.lowercase(Locale.getDefault()).contains(albumName)
                 ) {
                     filteredGalleryModels.add(galleryModel)
                 }
             }
         }
-        notifyDataSetChanged()
+        notifyItemRangeInserted(0, filteredGalleryModels.size - 1)
     }
 
-    fun setColumnWidthAndRatio(columnWidth: Double, ratio: Double) {
+    fun setColumnWidthAndRatio(columnWidth: Double) {
         this.columnWidth = columnWidth
     }
 

@@ -15,7 +15,7 @@
         android:layout_width="@dimen/padding_115"
         android:layout_height="@dimen/padding_115"
         android:layout_margin="@dimen/padding_5"
-        android:background="@{model.selected?@drawable/round_courner_with_bg_color_primary_with_stroke:@drawable/round_courner_with_bg_white_stroke_gray}"
+        android:background="@drawable/round_courner_with_bg_white_stroke_gray"
         android:gravity="center"
         android:padding="@dimen/padding_2"
         app:layoutHeight="@{model.columnHeight}"
@@ -46,16 +46,15 @@
             android:visibility="@{model.video?View.VISIBLE:View.GONE}" />
 
         <ImageView
-            android:id="@+id/imgview_counter"
+            android:id="@+id/imgviewRemove"
             android:layout_width="@dimen/padding_25"
             android:layout_height="@dimen/padding_25"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
             android:gravity="center"
-            android:padding="@dimen/padding_2"
-            android:src="@drawable/done_white_icon"
-            android:visibility="@{model.selected?View.VISIBLE:View.GONE}" />
+            android:padding="@dimen/padding_8"
+            android:src="@drawable/close_black_icon" />
 
     </RelativeLayout>
 </layout>

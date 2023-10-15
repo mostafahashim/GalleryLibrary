@@ -1,16 +1,14 @@
-package hashim.gallerylib.view
+package hashim.gallerylib.view.cameraActivity
 
 import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.View
 import androidx.core.app.ActivityCompat
 import hashim.gallerylib.R
@@ -19,6 +17,7 @@ import hashim.gallerylib.cameraCore.CameraPreview
 import hashim.gallerylib.databinding.ActivityCustomCameraUiBinding
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
+import hashim.gallerylib.view.GalleryBaseActivity
 import java.io.File
 
 class CustomCameraActivity : GalleryBaseActivity(

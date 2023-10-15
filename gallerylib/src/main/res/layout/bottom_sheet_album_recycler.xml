@@ -32,12 +32,12 @@
 
             <ImageView
                 android:id="@+id/iv_close_bottomSheet"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/padding_40"
+                android:layout_height="@dimen/padding_40"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_white"
-                android:padding="@dimen/padding_10"
+                android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
+                android:padding="@dimen/padding_14"
                 android:src="@drawable/close_black_icon"
                 android:text="@string/app_name"
                 android:textColor="@color/trolleygrey"

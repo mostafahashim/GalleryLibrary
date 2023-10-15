@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">GalleryApp</string>
-    <string name="open_gallery">Open Gallery</string>
+    <string name="open_gallery" translatable="false">Open Gallery</string>
 </resources>

@@ -13,6 +13,7 @@ import hashim.gallerylib.adapter.RecyclerGalleryAdapter
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnItemSelectedListener
 import hashim.gallerylib.util.GalleryConstants
+import hashim.gallerylib.util.ScreenSizeUtils
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -32,38 +33,29 @@ class GalleryViewModel : ViewModel() {
     lateinit var tempCaptueredFile: File
     lateinit var mImageUri: Uri
 
-    var recyclerGalleryAdapter: RecyclerGalleryAdapter
+    lateinit var recyclerGalleryAdapter: RecyclerGalleryAdapter
 
     init {
-        var selectedType = ""
-        if (selectedPhotos.size > 0) {
-            selectedType = selectedPhotos[0].type
-        } else {
-            selectedPhotos = ArrayList()
-        }
-        recyclerGalleryAdapter =
-            RecyclerGalleryAdapter(0.0,
-                selectedType, maxSelectionCount,
-                ArrayList(),
-                object :
-                    OnItemSelectedListener {
-                    override fun onItemSelectedListener(position: Int) {
-                        showHideButtonDone(getSelected().size > 0)
-                    }
-                }
-            )
+//        recyclerGalleryAdapter =
+//            RecyclerGalleryAdapter(0.0, "", maxSelectionCount, ArrayList(), object :
+//                OnItemSelectedListener {
+//                override fun onItemSelectedListener(position: Int) {
+//                    showHideButtonDone(getSelected().size > 0)
+//                }
+//            })
     }
 
-    fun initGalleryAdapter() {
+    fun initGalleryAdapter(screenWidth: Int) {
         var selectedType = ""
         if (selectedPhotos.size > 0) {
             selectedType = selectedPhotos[0].type
         } else {
             selectedPhotos = ArrayList()
         }
+        val columnWidth = (105.00 * screenWidth) / 360.00
 
         recyclerGalleryAdapter =
-            RecyclerGalleryAdapter(0.0,
+            RecyclerGalleryAdapter(columnWidth,
                 selectedType, maxSelectionCount,
                 ArrayList(),
                 object :
@@ -82,11 +74,6 @@ class GalleryViewModel : ViewModel() {
 
     fun getSelected(): ArrayList<GalleryModel> {
         return recyclerGalleryAdapter.getSelected()
-    }
-
-    fun updateBooksAdapterColumnWidth(columnWidth: Double) {
-        recyclerGalleryAdapter.setColumnWidthAndRatio(columnWidth, 0.0)
-        recyclerGalleryAdapter.notifyDataSetChanged()
     }
 
     fun initializeCameraButtons() {
@@ -526,6 +513,24 @@ class GalleryViewModel : ViewModel() {
         }
 
         return null
+    }
+
+    fun checkImageStatus(context: Context) {
+        if (recyclerGalleryAdapter.itemCount == 0) {
+            //no media found
+            isHasMedia.value = false
+        } else {
+            //media found
+            isHasMedia.value = true
+            //select album if one item selected, else select all albums
+            if (selectedPhotos.size == 1) {
+                recyclerGalleryAdapter.filter(selectedPhotos[0].albumName)
+                //change album name in dropdown
+                selectedAlbumName.value = selectedPhotos[0].albumName
+            } else {
+                selectedAlbumName.value = context.getString(R.string.all)
+            }
+        }
     }
 
     interface Observer {
