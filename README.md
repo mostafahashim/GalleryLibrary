@@ -20,7 +20,7 @@ maven { url 'https://jitpack.io' }
 
 ```groovy
 dependencies {
-implementation 'com.github.mostafahashim:GalleryLibrary:1.1.2'
+implementation 'com.github.mostafahashim:GalleryLibrary:1.1.3'
 }
 ```
 # Usage
