@@ -18,5 +18,5 @@ maven { url 'https://jitpack.io' }
 Step 2. Add the dependency
 
 dependencies {
-implementation 'com.github.mostafahashim:GalleryLibrary:1.1.0'
+implementation 'com.github.mostafahashim:GalleryLibrary:1.1.1'
 }
