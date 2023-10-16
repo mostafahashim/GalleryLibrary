@@ -62,7 +62,8 @@ dependencies {
     implementation("com.github.2coffees1team:GlideToVectorYou:v2.0.0")
     kapt ("com.github.bumptech.glide:compiler:4.13.0")
 
-    implementation(project(":gallerylib"))
+//    implementation(project(":gallerylib"))
 
+    implementation ("com.github.mostafahashim:GalleryLibrary:1.1.0")
     implementation("com.github.2coffees1team:GlideToVectorYou:v2.0.0")
 }
