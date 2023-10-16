@@ -2,14 +2,17 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'maven-publish'
 }
 
+var libVersionName = project.findProperty("VERSION_NAME") as String
 android {
     namespace 'hashim.gallerylib'
     compileSdk 34
 
     buildFeatures {
         dataBinding = true
+        buildConfig = true
     }
 
     defaultConfig {
@@ -18,7 +21,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
-
+        buildConfigField("String", "GalleryLib_VERSION", "\"$libVersionName\"")
     }
 
     buildTypes {
@@ -29,15 +32,22 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     lint {
         abortOnError false
         checkReleaseBuilds false
+    }
+
+    //publishing on maven central
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
     }
 
 }
@@ -66,4 +76,18 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.13.0'
     //multidex
     implementation 'androidx.multidex:multidex:2.0.1'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'mostafa.hashim'
+                artifactId = 'gallery-lib'
+                version = '1.0'
+            }
+        }
+    }
 }

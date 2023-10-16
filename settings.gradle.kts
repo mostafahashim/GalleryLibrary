@@ -28,4 +28,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "GalleryApp"
 include(":app",":gallerylib")
- 
