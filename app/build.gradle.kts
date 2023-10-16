@@ -8,7 +8,7 @@ android {
     namespace = "hashim.gallery"
     compileSdk = 34
 
-    
+
     buildFeatures {
         dataBinding = true
         buildConfig = true
