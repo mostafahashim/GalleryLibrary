@@ -58,8 +58,7 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
     override fun applyOverrideConfiguration(overrideConfiguration: Configuration?) {
         super.applyOverrideConfiguration(
             LocaleHelper.applyOverrideConfiguration(
-                baseContext,
-                overrideConfiguration
+                baseContext, overrideConfiguration
             )
         )
     }
@@ -76,9 +75,14 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
 
         GalleryLib(this).showGallery(
             isDialog = binding.viewModel?.isDialog?.value ?: false,
-            selectionType = GalleryConstants.GalleryTypeImages,
-            locale = Preferences.getApplicationLocale(),
-            maxSelectionCount = 40,
+            selectionType = if (binding.viewModel?.isShowImages?.value!! && binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeImagesAndVideos
+            else if (binding.viewModel?.isShowImages?.value!!) GalleryConstants.GalleryTypeImages
+            else if (binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeVideos
+            else GalleryConstants.GalleryTypeImagesAndVideos,
+            //locale only for activity view, dialog view will work on application locale
+            locale = if (binding.viewModel?.isRTL?.value!!) "ar" else "en",
+            maxSelectionCount = if (binding.viewModel?.count?.value?.isNotEmpty() == true) binding.viewModel?.count?.value?.toInt()!!
+            else 1,
             selected = galleryModels,
             onResultCallback = object : OnResultCallback {
                 override fun onResult(list: ArrayList<GalleryModel>) {
@@ -94,18 +98,15 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
 
     val galleryResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK
-            ) {
+            if (result.resultCode == Activity.RESULT_OK) {
                 //back from gallery activity
-                val galleryModels =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        result.data?.extras?.getParcelableArrayList(
-                            GalleryConstants.selected,
-                            GalleryModel::class.java
-                        ) as ArrayList<GalleryModel>
-                    } else {
-                        result.data?.extras?.get(GalleryConstants.selected) as ArrayList<*>
-                    }
+                val galleryModels = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    result.data?.extras?.getParcelableArrayList(
+                        GalleryConstants.selected, GalleryModel::class.java
+                    ) as ArrayList<GalleryModel>
+                } else {
+                    result.data?.extras?.get(GalleryConstants.selected) as ArrayList<*>
+                }
                 if (galleryModels.isNotEmpty()) {
                     binding.viewModel?.galleryModels = galleryModels as ArrayList<GalleryModel>
                     binding.viewModel?.recyclerGalleryAdapter?.setList(

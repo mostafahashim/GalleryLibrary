@@ -51,7 +51,7 @@
             android:layout_height="@dimen/padding_25"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
+            android:background="@drawable/circle_bg_white_with_transparent_gray_selector"
             android:gravity="center"
             android:padding="@dimen/padding_8"
             android:src="@drawable/close_black_icon" />

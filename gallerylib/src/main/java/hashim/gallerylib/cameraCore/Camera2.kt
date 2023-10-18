@@ -11,24 +11,23 @@ import android.hardware.camera2.*
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.TextureView
-import androidx.annotation.RequiresApi
+import android.view.WindowInsets
 import androidx.core.content.ContextCompat
 import java.util.*
 import java.util.Collections.singletonList
-import kotlin.Comparator
+import kotlin.math.max
 
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class Camera2(private val activity: Activity, private val textureView: AutoFitTextureView) {
 
     private var onBitmapReady: (Bitmap) -> Unit = {}
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private val cameraManager: CameraManager =
         textureView.context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     private var cameraFacing = CameraCharacteristics.LENS_FACING_BACK
@@ -37,7 +36,6 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
     //Current Camera id
     private var cameraId = "-1"
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
     private var cameraDevice: CameraDevice? = null
@@ -69,15 +67,15 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
     private var mSensorOrientation = 0
 
 
-    private val cameraCaptureCallBack = @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    object : CameraCaptureSession.CaptureCallback() {
+    private val cameraCaptureCallBack = object : CameraCaptureSession.CaptureCallback() {
 
         private fun process(captureResult: CaptureResult) {
             when (cameraState) {
-// We have nothing to do when the camera preview is working normally.
+                // We have nothing to do when the camera preview is working normally.
                 STATE_PREVIEW -> {
 
                 }
+
                 STATE_WAITING_LOCK -> {
                     val afState = captureResult[CaptureResult.CONTROL_AF_STATE]
                     if (afState == null || cameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
@@ -86,18 +84,18 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                     } else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED
                         || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
                     ) {
-// CONTROL_AE_STATE can be null on some devices
+                        // CONTROL_AE_STATE can be null on some devices
                         val aeState = captureResult[CaptureResult.CONTROL_AE_STATE]
                         if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                             cameraState = STATE_PICTURE_TAKEN
                             captureStillPicture()
 
-                        } else runPrecaptureSequence()
+                        } else runPreCaptureSequence()
                     }
                 }
 
                 STATE_WAITING_PRECAPTURE -> {
-// CONTROL_AE_STATE can be null on some devices
+                    // CONTROL_AE_STATE can be null on some devices
                     val aeState = captureResult[CaptureResult.CONTROL_AE_STATE]
                     if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED) {
                         cameraState = STATE_WAITING_NON_PRECAPTURE
@@ -105,7 +103,7 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                 }
 
                 STATE_WAITING_NON_PRECAPTURE -> {
-// CONTROL_AE_STATE can be null on some devices
+                    // CONTROL_AE_STATE can be null on some devices
                     val aeState = captureResult[CaptureResult.CONTROL_AE_STATE]
                     if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
                         cameraState = STATE_PICTURE_TAKEN
@@ -132,10 +130,8 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
         }
     }
 
-
     private companion object {
-// These values represent Camera states.
-
+        // These values represent Camera states.
         // Showing Camera Preview.
         private const val STATE_PREVIEW = 0
 
@@ -193,7 +189,6 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
          * @param aspectRatio       The aspect ratio
          * @return The optimal {@code Size}, or an arbitrary one if none were big enough
          */
-        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         private fun chooseOptimalSize(
             choices: Array<Size>, textureViewWidth: Int,
             textureViewHeight: Int, maxWidth: Int, maxHeight: Int, aspectRatio: Size
@@ -230,7 +225,6 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
             }
         }
 
-        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         private val compareSizesByArea = Comparator<Size> { lhs, rhs ->
             // We cast here to ensure the multiplications won't overflow
             java.lang.Long.signum(lhs.width.toLong() * lhs.height - rhs.width.toLong() * rhs.height)
@@ -244,7 +238,6 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
 //    }
 
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
             configureTransform(width, height)
 
@@ -258,15 +251,13 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
             return true
         }
 
-        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
             openCamera(width, height)
 
         }
     }
 
-    private val cameraStateCallback = @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    object : CameraDevice.StateCallback() {
+    private val cameraStateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
             this@Camera2.cameraDevice = camera
             createPreviewSession()
@@ -281,39 +272,31 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun onResume() {
         openBackgroundThread()
         if (textureView.isAvailable) {
             openCamera(textureView.width, textureView.height)
         } else textureView.surfaceTextureListener = surfaceTextureListener
-
-
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun close() {
         closeCamera()
         closeBackgroundThread()
-
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun closeCamera() {
         if (cameraCaptureSession != null) {
             cameraCaptureSession!!.close()
             cameraCaptureSession = null
             //   cameraSessionClosed = true
         }
-
         if (cameraDevice != null) {
             cameraDevice!!.close()
             cameraDevice = null
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun closeBackgroundThread() {
         if (backgroundHandler != null) {
             backgroundThread!!.quitSafely()
@@ -322,21 +305,16 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
         }
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun openCamera(width: Int, height: Int) {
         if (ContextCompat.checkSelfPermission(
                 textureView.context,
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-//setup camera called here
+            //setup camera called here
             setUpCameraOutputs(width, height)
             configureTransform(width, height)
-
             cameraManager.openCamera(cameraId, cameraStateCallback, backgroundHandler)
-
-
         } else Log.e("Camera2", "Requires Camera Permission")
     }
 
@@ -348,8 +326,6 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
      */
 
     lateinit var cameraCharacteristics: CameraCharacteristics
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun setUpCameraOutputs(width: Int, height: Int) {
         try {
             for (cameraId in cameraManager.cameraIdList) {
@@ -360,17 +336,20 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                     val streamConfigurationMap = cameraCharacteristics.get(
                         CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
                     )
-// For still image captures, we use the largest available size.
-                    val largest = Collections.max(
-                        streamConfigurationMap?.getOutputSizes(ImageFormat.JPEG)?.toList(),
-                        compareSizesByArea
-                    )
-// image reader could go here
-
-// Find out if we need to swap dimension to get the preview size relative to sensor
-// coordinate.
-                    val displayRotation = activity.windowManager.defaultDisplay.rotation
-
+                    // For still image captures, we use the largest available size.
+                    val largest =
+                        streamConfigurationMap?.getOutputSizes(ImageFormat.JPEG)?.toList().let {
+                            Collections.max(
+                                it!!,
+                                compareSizesByArea
+                            )
+                        }
+                    // image reader could go here
+                    // Find out if we need to swap dimension to get the preview size relative to sensor coordinate.
+                    val displayRotation = if (Build.VERSION.SDK_INT >= 30)
+                        activity.display?.rotation
+                    else
+                        activity.windowManager.defaultDisplay.rotation
                     //noinspection ConstantConditions
                     mSensorOrientation =
                         cameraCharacteristics[CameraCharacteristics.SENSOR_ORIENTATION] ?: 0
@@ -380,23 +359,28 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                     when (displayRotation) {
                         Surface.ROTATION_0 -> {
                         }
+
                         Surface.ROTATION_90 -> {
                         }
+
                         Surface.ROTATION_180 -> {
                             swappedDimensions =
                                 mSensorOrientation == 90 || mSensorOrientation == 270
                         }
+
                         Surface.ROTATION_270 -> {
                             swappedDimensions = mSensorOrientation == 0 || mSensorOrientation == 180
                         }
+
                         else -> Log.e("Camera2", "Display rotation is invalid: $displayRotation")
 
                     }
 
-                    val displaySize = Point()
-
-                    activity.windowManager.defaultDisplay.getSize(displaySize)
-
+                    val displaySize = Point(getScreenWidth(activity), getScreenHeight(activity))
+//                    if (Build.VERSION.SDK_INT >= 30)
+//                        activity.display?.getSize(displaySize)
+//                    else
+//                        activity.windowManager.defaultDisplay.getSize(displaySize)
                     var rotatedPreviewWidth = width
                     var rotatedPreviewHeight = height
                     var maxPreviewWidth = displaySize.x
@@ -442,7 +426,7 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                     // check flash support
                     val flashSupported =
                         cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)
-                    isFlashSupported = flashSupported == null ?: false
+                    isFlashSupported = flashSupported == (null ?: false)
 
                     this.cameraId = cameraId
 
@@ -454,6 +438,40 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
         }
     }
 
+    private fun getScreenWidth(activity: Activity): Int {
+        return try {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val windowMetrics = activity.windowManager.currentWindowMetrics
+                val insets: Insets = windowMetrics.windowInsets
+                    .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+                windowMetrics.bounds.width() - insets.left - insets.right
+            } else {
+                val displayMetrics = DisplayMetrics()
+                activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
+                displayMetrics.widthPixels
+            }
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+    private fun getScreenHeight(activity: Activity): Int {
+        return try {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val windowMetrics = activity.windowManager.currentWindowMetrics
+                val insets: Insets = windowMetrics.windowInsets
+                    .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+                windowMetrics.bounds.height() - insets.bottom - insets.top
+            } else {
+                val displayMetrics = DisplayMetrics()
+                activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
+                displayMetrics.heightPixels
+            }
+        } catch (e: Exception) {
+            0
+        }
+    }
+
     /**
      * Configures the necessary [android.graphics.Matrix] transformation to `mTextureView`.
      * This method should be called after the camera preview size is determined in
@@ -462,9 +480,12 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
      * @param viewWidth  The width of `mTextureView`
      * @param viewHeight The height of `mTextureView`
      */
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
-        val rotation = activity.windowManager.defaultDisplay.rotation
+        val rotation = if (Build.VERSION.SDK_INT >= 30)
+            activity.display?.rotation
+        else
+            activity.windowManager.defaultDisplay.rotation
         val matrix = Matrix()
         val viewRect = RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
         val bufferRect =
@@ -474,7 +495,7 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
         if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
             bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
             matrix.setRectToRect(viewRect, bufferRect, ScaleToFit.FILL)
-            val scale = Math.max(
+            val scale = max(
                 viewHeight.toFloat() / previewSize!!.height,
                 viewWidth.toFloat() / previewSize!!.width
             )
@@ -508,29 +529,22 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
     }
 
     // Creates a new camera preview session
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     private fun createPreviewSession() {
 
         try {
-
             val surfaceTexture = textureView.surfaceTexture
-// We configure the size of default buffer to be the size of camera preview we want.
+            // We configure the size of default buffer to be the size of camera preview we want.
             surfaceTexture?.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
-
-// This is the output Surface we need to start preview.
+            // This is the output Surface we need to start preview.
             if (surface == null)
                 surface = Surface(surfaceTexture)
-
             val previewSurface = surface
-// We set up a CaptureRequest.Builder with the output Surface.
-
+            // We set up a CaptureRequest.Builder with the output Surface.
             captureRequestBuilder =
                 cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             captureRequestBuilder!!.addTarget(previewSurface!!)
-
-
-// Here, we create a CameraCaptureSession for camera preview.
-
+            // Here, we create a CameraCaptureSession for camera preview.
             cameraDevice!!.createCaptureSession(
                 singletonList(previewSurface),
                 object : CameraCaptureSession.StateCallback() {
@@ -539,20 +553,16 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                         if (cameraDevice == null) {
                             return
                         }
-
                         try {
-// When session is ready we start displaying preview.
+                            // When session is ready we start displaying preview.
                             this@Camera2.cameraCaptureSession = cameraCaptureSession
                             //     cameraSessionClosed = false
-
-// Auto focus should be continuous for camera preview.
-
+                            // Auto focus should be continuous for camera preview.
                             captureRequestBuilder!!.set(
                                 CaptureRequest.CONTROL_AF_MODE,
                                 CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
                             )
-
-// Finally, we start displaying the camera preview.
+                            // Finally, we start displaying the camera preview.
                             captureRequest = captureRequestBuilder!!.build()
 
                             this@Camera2.cameraCaptureSession!!.setRepeatingRequest(
@@ -560,17 +570,14 @@ class Camera2(private val activity: Activity, private val textureView: AutoFitTe
                                 cameraCaptureCallBack,
                                 backgroundHandler
                             )
-
-
-/* Initially flash is automatically enabled when necessary. But In case activity is resumed and flash is set to fire
-we set flash after the preview request is processed to ensure flash fires only during a still capture. */
+                            /* Initially flash is automatically enabled when necessary. But In case activity is resumed and flash is set to fire
+                            we set flash after the preview request is processed to ensure flash fires only during a still capture. */
                             setFlashMode(captureRequestBuilder!!, true)
 
 
                         } catch (e: CameraAccessException) {
                             e.printStackTrace()
                         }
-
                     }
 
                     override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
@@ -584,12 +591,12 @@ we set flash after the preview request is processed to ensure flash fires only d
 
     }
 
-/* For some reason, The code for firing flash in both methods below which is prescribed doesn't work on API level below PIE it maybe a device-specific issue as very common with Camera API
-   so I had to build my own code if the else block works well for your devices even below PIE I would recommend using it because that's
-   the official way and code is available for all levels >=21 as mentioned.
-*/
+    /* For some reason, The code for firing flash in both methods below which is prescribed doesn't work on API level below PIE it maybe a device-specific issue as very common with Camera API
+       so I had to build my own code if the else block works well for your devices even below PIE I would recommend using it because that's
+       the official way and code is available for all levels >=21 as mentioned.
+    */
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     private fun flashOn(captureRequestBuilder: CaptureRequest.Builder) {
         //  cameraManager.setTorchMode()
         if (Build.VERSION.SDK_INT > 28) {
@@ -607,7 +614,7 @@ we set flash after the preview request is processed to ensure flash fires only d
     }
 
     // sets flash mode for a capture request builder
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     private fun setFlashMode(
         captureRequestBuilder: CaptureRequest.Builder,
         trigger: Boolean
@@ -627,6 +634,7 @@ we set flash after the preview request is processed to ensure flash fires only d
                     CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
                 )
             }
+
             else -> captureRequestBuilder.set(
                 CaptureRequest.FLASH_MODE,
                 CaptureRequest.FLASH_MODE_OFF
@@ -639,29 +647,27 @@ we set flash after the preview request is processed to ensure flash fires only d
     }
 
     // Locks the preview focus.
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     private fun lockPreview() {
         try {
-            captureRequestBuilder!!.set(
+            captureRequestBuilder?.set(
                 CaptureRequest.CONTROL_AF_TRIGGER,
                 CameraMetadata.CONTROL_AF_TRIGGER_START
             )
-// Tell #cameraCaptureCallback to wait for the lock.
+            // Tell #cameraCaptureCallback to wait for the lock.
             cameraState = STATE_WAITING_LOCK
-            cameraCaptureSession!!.capture(
+            cameraCaptureSession?.capture(
                 captureRequestBuilder!!.build(), cameraCaptureCallBack, backgroundHandler
             )
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun unlockPreview() {
         try {
-// Reset the auto-focus trigger
+            // Reset the auto-focus trigger
             captureRequestBuilder!!.set(
                 CaptureRequest.CONTROL_AF_TRIGGER,
                 CameraMetadata.CONTROL_AF_TRIGGER_CANCEL
@@ -673,25 +679,18 @@ we set flash after the preview request is processed to ensure flash fires only d
             cameraCaptureSession!!.capture(
                 captureRequestBuilder!!.build(), cameraCaptureCallBack, backgroundHandler
             )
-// After this, the camera will go back to the normal state of preview.
+            // After this, the camera will go back to the normal state of preview.
             cameraState = STATE_PREVIEW
-
-
-
             cameraCaptureSession!!.setRepeatingRequest(
                 captureRequest!!, cameraCaptureCallBack,
                 backgroundHandler
             )
-
-
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
-
     }
 
     // This method switches Camera Lens Front or Back then restarts camera.
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun switchCamera() {
         close()
         cameraFacing = if (cameraFacing == CameraCharacteristics.LENS_FACING_BACK)
@@ -723,32 +722,22 @@ we set flash after the preview request is processed to ensure flash fires only d
     }
 
     /**
-     * Run the precapture sequence for capturing a still image. This method should be called when
+     * Run the preCapture sequence for capturing a still image. This method should be called when
      * we get a response in {@link #mCaptureCallback} from {@link #lockPreview()}.
      */
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun runPrecaptureSequence() {
+    private fun runPreCaptureSequence() {
         try {
-
-
-// Tell #cameraCaptureCallback to wait for the precapture sequence to be set.
+            // Tell #cameraCaptureCallback to wait for the preCapture sequence to be set.
             cameraState = STATE_WAITING_PRECAPTURE
-
             setFlashMode(captureRequestBuilder!!, true)
-
             cameraCaptureSession!!.capture(
                 captureRequestBuilder!!.build(),
                 cameraCaptureCallBack,
                 backgroundHandler
             )
-
-
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
-
-
     }
 
 
@@ -762,13 +751,13 @@ we set flash after the preview request is processed to ensure flash fires only d
      * Capture a still picture. This method should be called when we get a response in
      * {@link #cameraCaptureCallback} from both {@link #lockPreview()}.
      */
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     private fun captureStillPicture() {
         try {
 // This is the CaptureRequest.Builder that we use to take a picture.
             val captureBuilder =
                 cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-
+            captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, Rect(0,0,0,0))
 //            val surfaceTexture = textureView.surfaceTexture
 //            surfaceTexture.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
             captureBuilder.addTarget(surface!!)
@@ -782,10 +771,12 @@ we set flash after the preview request is processed to ensure flash fires only d
             setFlashMode(captureBuilder, true)
 
             // Orientation
-            val rotation = activity.windowManager.defaultDisplay.rotation
+            val rotation = if (Build.VERSION.SDK_INT >= 30)
+                activity.display?.rotation
+            else
+                activity.windowManager.defaultDisplay.rotation
 
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation))
-
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation ?: 0))
             cameraCaptureSession!!.stopRepeating()
             cameraCaptureSession!!.abortCaptures()
             cameraCaptureSession!!.capture(
@@ -796,11 +787,8 @@ we set flash after the preview request is processed to ensure flash fires only d
                         request: CaptureRequest,
                         result: TotalCaptureResult
                     ) {
-
                         captureBitmap()
                         unlockPreview()
-
-
                     }
                 },
                 null
@@ -823,12 +811,11 @@ we set flash after the preview request is processed to ensure flash fires only d
 //        isFlashSupported && (flash == FLASH.ON) && cameraFacing == CameraCharacteristics.LENS_FACING_BACK
 
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun takePhoto(onBitmapReady: (Bitmap) -> Unit) {
         this.onBitmapReady = onBitmapReady
         val afAvailableModes: IntArray? =
             cameraCharacteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES)
-        var mAutoFocusSupported =
+        val mAutoFocusSupported =
             !(afAvailableModes?.isEmpty() == true || (afAvailableModes?.size == 1
                     && afAvailableModes[0] == CameraMetadata.CONTROL_AF_MODE_OFF))
         if (mAutoFocusSupported)

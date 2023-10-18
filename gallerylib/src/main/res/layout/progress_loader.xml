@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+
+    <ProgressBar
+        android:layout_width="@dimen/padding_30"
+        android:layout_height="@dimen/padding_30"
+        android:layout_gravity="center_horizontal"
+        android:indeterminateDuration="1000" />
+
+    <TextView
+        android:id="@+id/tvMSG_customProgressDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/padding_15"
+        android:includeFontPadding="false"
+        android:text="@string/please_wait"
+        android:textColor="@color/white"
+        android:textSize="@dimen/font_size_16"
+        android:textStyle="normal" />
+</LinearLayout>

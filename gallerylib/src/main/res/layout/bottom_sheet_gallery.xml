@@ -11,16 +11,21 @@
             type="hashim.gallerylib.view.galleryActivity.GalleryViewModel" />
     </data>
 
-    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/gray"
+        android:background="@drawable/round_16_top_bg_white"
         android:orientation="vertical"
-        app:behavior_peekHeight="@dimen/padding_100">
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="@dimen/padding_100"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/padding_55"
+            android:layout_marginStart="@dimen/padding_15"
+            android:layout_marginEnd="@dimen/padding_15"
             android:background="@color/white"
             android:gravity="center_vertical">
 
@@ -119,7 +124,8 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/gray_dark">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcGallery"

@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -21,16 +22,15 @@ import kotlin.collections.ArrayList
 
 class RecyclerGalleryAdapter(
     var columnWidth: Double,
-    var selectedType: String, var maxSelectionCount: Int,
+    var maxSelectionCount: Int,
     var filteredGalleryModels: ArrayList<GalleryModel>,
     var onItemSelectedListener: OnItemSelectedListener
 ) : RecyclerView.Adapter<RecyclerGalleryAdapter.ViewHolder>() {
 
-    var originalGalleryModels: ArrayList<GalleryModel> = ArrayList()
+    private var originalGalleryModels = ArrayList<GalleryModel>()
 
     init {
-        originalGalleryModels = ArrayList()
-        originalGalleryModels.addAll(filteredGalleryModels)
+        originalGalleryModels = filteredGalleryModels.map { it.copy() }.toCollection(ArrayList())
     }
 
     lateinit var context: Context
@@ -38,10 +38,7 @@ class RecyclerGalleryAdapter(
         context = parent.context
         val inflater = LayoutInflater.from(parent.context)
         val binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.item_recycler_gallery,
-            parent,
-            false
+            inflater, R.layout.item_recycler_gallery, parent, false
         ) as ItemRecyclerGalleryBinding
         return ViewHolder(
             binding
@@ -53,6 +50,9 @@ class RecyclerGalleryAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         filteredGalleryModels[holder.layoutPosition].columnWidth = columnWidth
         filteredGalleryModels[holder.layoutPosition].columnHeight = columnWidth
+
+        //show counter if selection count > 1
+        holder.binding.showCounter = maxSelectionCount > 1
 
         if (filteredGalleryModels[holder.layoutPosition].type.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
             //image type
@@ -67,6 +67,14 @@ class RecyclerGalleryAdapter(
             filteredGalleryModels[holder.layoutPosition].isVideo = true
         }
         holder.binding.model = filteredGalleryModels[holder.layoutPosition]
+        holder.binding.imgviewPreview.setOnClickListener { imageview ->
+            onItemSelectedListener.onImageView(
+                holder.layoutPosition,
+                holder.binding.ivImage,
+                filteredGalleryModels
+            )
+        }
+
         holder.binding.galleryItemContainer.setOnClickListener {
             changeSelection(holder.layoutPosition)
             onItemSelectedListener.onItemSelectedListener(0)
@@ -78,7 +86,7 @@ class RecyclerGalleryAdapter(
         val galleryModelsSelected = ArrayList<GalleryModel>()
         for (i in originalGalleryModels.indices) {
             if (originalGalleryModels[i].isSelected) {
-                galleryModelsSelected.add(originalGalleryModels[i])
+                galleryModelsSelected.add(originalGalleryModels[i].copy())
             }
         }
         return galleryModelsSelected
@@ -86,10 +94,11 @@ class RecyclerGalleryAdapter(
 
     fun addAll(files: ArrayList<GalleryModel>) {
         try {
-            originalGalleryModels = ArrayList()
-            originalGalleryModels.addAll(files)
             filteredGalleryModels = ArrayList()
             filteredGalleryModels.addAll(files)
+            originalGalleryModels = ArrayList()
+            originalGalleryModels =
+                filteredGalleryModels.map { it.copy() }.toCollection(ArrayList())
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -98,17 +107,15 @@ class RecyclerGalleryAdapter(
 
     fun addItemToTop(file: GalleryModel) {
         try {
-            if (originalGalleryModels.isNotEmpty())
-                originalGalleryModels.add(0, file)
+            if (originalGalleryModels.isNotEmpty()) originalGalleryModels.add(0, file.copy())
             else {
                 originalGalleryModels = ArrayList()
-                originalGalleryModels.add(0, file)
+                originalGalleryModels.add(0, file.copy())
             }
-            if (filteredGalleryModels.isNotEmpty())
-                filteredGalleryModels.add(0, file)
+            if (filteredGalleryModels.isNotEmpty()) filteredGalleryModels.add(0, file.copy())
             else {
                 filteredGalleryModels = ArrayList()
-                filteredGalleryModels.add(0, file)
+                filteredGalleryModels.add(0, file.copy())
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -116,18 +123,50 @@ class RecyclerGalleryAdapter(
         notifyItemInserted(0)
     }
 
+    fun reduceAllSelectedIndices(currentIndexWhenSelected: Int) {
+        for (i in originalGalleryModels.indices) {
+            if (originalGalleryModels[i].isSelected
+                && originalGalleryModels[i].index_when_selected > currentIndexWhenSelected
+            ) {
+                originalGalleryModels[i].index_when_selected -= 1
+//                notifyItemChanged(i)
+            }
+        }
+        for (i in filteredGalleryModels.indices) {
+            if (filteredGalleryModels[i].isSelected
+                && filteredGalleryModels[i].index_when_selected > currentIndexWhenSelected
+            ) {
+                filteredGalleryModels[i].index_when_selected -= 1
+                notifyItemChanged(i)
+            }
+        }
+    }
+
+    fun getIndexFromOriginalList(galleryModel: GalleryModel): Int {
+        for (i in originalGalleryModels.indices) {
+            if (galleryModel.itemUrI.compareTo(originalGalleryModels[i].itemUrI) == 0
+                || galleryModel.url.compareTo(originalGalleryModels[i].url) == 0
+            )
+                return i
+        }
+        return -1
+    }
+
     fun changeSelection(position: Int) {
         //get index in original before edit in item
-        val indexInOriginal = originalGalleryModels.indexOf(filteredGalleryModels[position])
+        val indexInOriginal = getIndexFromOriginalList(filteredGalleryModels[position])
         if (filteredGalleryModels[position].isSelected) {
+            //reduce items index that selected after this item
+            if (maxSelectionCount > 1)
+                reduceAllSelectedIndices(
+                    filteredGalleryModels[position].index_when_selected
+                )
             //deselect item
             filteredGalleryModels[position].isSelected = false
             filteredGalleryModels[position].index_when_selected = 0
             //change selection in original list
-            originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
-            if (getSelected().isEmpty()) {
-                selectedType = ""
-            }
+            if (indexInOriginal != -1)
+                originalGalleryModels[indexInOriginal] = filteredGalleryModels[position].copy()
             //update view
             notifyItemChanged(position)
         } else {
@@ -136,69 +175,25 @@ class RecyclerGalleryAdapter(
                 deselectAll()
                 filteredGalleryModels[position].isSelected = true
                 filteredGalleryModels[position].index_when_selected = getSelected().size + 1
-                selectedType = filteredGalleryModels[position].type
                 //change selection in original list
-                originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
+                if (indexInOriginal != -1)
+                    originalGalleryModels[indexInOriginal] = filteredGalleryModels[position].copy()
                 //update view
                 notifyItemChanged(position)
             } else if (getSelected().size < maxSelectionCount) {
-                if (filteredGalleryModels[position].type.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
-                    if (selectedType == GalleryConstants.GalleryTypeImages || selectedType == "") {
-                        filteredGalleryModels[position].isSelected = true
-                        //set item selection index
-                        filteredGalleryModels[position].index_when_selected = getSelected().size + 1
-                        selectedType = filteredGalleryModels[position].type
-                        //change selection in original list
-                        originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
-                        //update view
-                        notifyItemChanged(position)
-                    } else {
-                        // video is selected before
-                        Toast.makeText(
-                            context,
-                            R.string.it_is_not_possible_to_select_photos_and_videos_at_the_same_time,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } else if (filteredGalleryModels[position].type.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
-                    if (selectedType == GalleryConstants.GalleryTypeVideos || selectedType == "") {
-                        if (getSelected().size == 0) {
-                            filteredGalleryModels[position].isSelected = true
-                            //set item selection index
-                            filteredGalleryModels[position].index_when_selected =
-                                getSelected().size + 1
-                            selectedType = filteredGalleryModels[position].type
-                            //update view
-                            notifyItemChanged(position)
-                        } else {
-                            // one video is selected before
-                            deselectAll()
-                            filteredGalleryModels[position].isSelected = true
-                            //set item selection index
-                            filteredGalleryModels[position].index_when_selected =
-                                getSelected().size + 1
-                            selectedType = filteredGalleryModels[position].type
-                            //update view
-                            notifyItemChanged(position)
-                        }
-                        //change selection in original list
-                        originalGalleryModels[indexInOriginal] = filteredGalleryModels[position]
-                    } else {
-                        // Photos is selected before
-                        Toast.makeText(
-                            context,
-                            R.string.it_is_not_possible_to_select_photos_and_videos_at_the_same_time,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
+                filteredGalleryModels[position].isSelected = true
+                //set item selection index
+                filteredGalleryModels[position].index_when_selected = getSelected().size + 1
+                //change selection in original list
+                if (indexInOriginal != -1)
+                    originalGalleryModels[indexInOriginal] = filteredGalleryModels[position].copy()
+                //update view
+                notifyItemChanged(position)
             } else {
                 Toast.makeText(
-                    context,
-                    context.getString(
+                    context, context.getString(
                         R.string.you_may_not_select_more_than_s_item, maxSelectionCount.toString()
-                    ),
-                    Toast.LENGTH_LONG
+                    ), Toast.LENGTH_LONG
                 ).show()
             }
         }
@@ -228,12 +223,12 @@ class RecyclerGalleryAdapter(
         filteredGalleryModels.clear()
         notifyItemRangeRemoved(0, size - 1)
         if (albumName.isEmpty()) {
-            filteredGalleryModels.addAll(originalGalleryModels)
+            filteredGalleryModels =
+                originalGalleryModels.map { it.copy() }.toCollection(ArrayList())
         } else {
             for (galleryModel in originalGalleryModels) {
-                if (galleryModel.albumName.lowercase(Locale.getDefault()).contains(albumName)
-                ) {
-                    filteredGalleryModels.add(galleryModel)
+                if (galleryModel.albumName.lowercase(Locale.getDefault()).contains(albumName)) {
+                    filteredGalleryModels.add(galleryModel.copy())
                 }
             }
         }

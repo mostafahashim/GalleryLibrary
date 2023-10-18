@@ -52,16 +52,14 @@
             android:name="hashim.gallerylib.view.galleryActivity.GalleryActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"
-            android:label="@string/app_name"
             android:resizeableActivity="true"
             android:theme="@style/AppTheme.NoActionBar.LightScreen"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.gallerylib.view.CustomCameraActivity"
+            android:name="hashim.gallerylib.view.cameraActivity.CameraActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"
-            android:label="@string/app_name"
             android:resizeableActivity="false"
             android:theme="@style/AppTheme.FullScreen.LightScreen"
             android:windowSoftInputMode="adjustResize" />

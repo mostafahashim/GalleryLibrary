@@ -26,6 +26,8 @@
   <color name="transparent23_colorPrimaryDark">#3B2bdfcc</color>
   <color name="transparent30_colorPrimaryDark">#482bdfcc</color>
   <color name="transparent10_trolleygrey">#16797979</color>
+  <color name="transparent23_trolleygrey">#3B797979</color>
+  <color name="transparent30_trolleygrey">#48797979</color>
   <color name="ash_gray">#b4b4b4</color>
   <color name="midnightgreen">#174f62</color>
   <color name="msugreen">#173d51</color>

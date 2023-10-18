@@ -2,12 +2,14 @@ package hashim.gallerylib.view
 
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -272,5 +274,20 @@ abstract class GalleryBaseActivity : AppCompatActivity {
     open fun finish_activity() {
         finish()
         overridePendingTransition(R.anim.slide_out_left, R.anim.slide_from_left_to_right)
+    }
+
+    fun hasPermissions(context: Context?, permissions: Array<String>): Boolean {
+        if (context != null && permissions != null) {
+            for (p in permissions) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        p
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 }

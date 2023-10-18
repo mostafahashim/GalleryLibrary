@@ -17,4 +17,5 @@
     <string name="cancel">إلغاء</string>
     <string name="settings">الإعدادت</string>
     <string name="you_may_not_select_more_than_s_item">لايمكن اختيار اكثر من %s عنصر</string>
+    <string name="please_wait">من فضلك انتظر...</string>
 </resources>

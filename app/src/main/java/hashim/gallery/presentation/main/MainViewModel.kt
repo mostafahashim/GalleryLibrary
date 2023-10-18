@@ -11,6 +11,10 @@ class MainViewModel : ViewModel() {
 
     var recyclerGalleryAdapter: RecyclerGalleryAdapter
     var isDialog = MutableLiveData(true)
+    var isRTL = MutableLiveData(true)
+    var isShowImages = MutableLiveData(true)
+    var isShowVideos = MutableLiveData(true)
+    var count = MutableLiveData("100")
 
     init {
         recyclerGalleryAdapter = RecyclerGalleryAdapter(galleryModels)

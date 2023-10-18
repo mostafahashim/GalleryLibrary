@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
 import android.provider.MediaStore
+import android.widget.ImageView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hashim.gallerylib.R
@@ -35,33 +36,26 @@ class GalleryViewModel : ViewModel() {
 
     lateinit var recyclerGalleryAdapter: RecyclerGalleryAdapter
 
-    init {
-//        recyclerGalleryAdapter =
-//            RecyclerGalleryAdapter(0.0, "", maxSelectionCount, ArrayList(), object :
-//                OnItemSelectedListener {
-//                override fun onItemSelectedListener(position: Int) {
-//                    showHideButtonDone(getSelected().size > 0)
-//                }
-//            })
-    }
 
     fun initGalleryAdapter(screenWidth: Int) {
-        var selectedType = ""
-        if (selectedPhotos.size > 0) {
-            selectedType = selectedPhotos[0].type
-        } else {
-            selectedPhotos = ArrayList()
-        }
-        val columnWidth = (105.00 * screenWidth) / 360.00
+        val columnWidth = (110.00 * screenWidth) / 360.00
 
         recyclerGalleryAdapter =
             RecyclerGalleryAdapter(columnWidth,
-                selectedType, maxSelectionCount,
+                maxSelectionCount,
                 ArrayList(),
                 object :
                     OnItemSelectedListener {
                     override fun onItemSelectedListener(position: Int) {
                         showHideButtonDone(getSelected().size > 0)
+                    }
+
+                    override fun onImageView(
+                        position: Int,
+                        imageView: ImageView,
+                        galleryModels: ArrayList<GalleryModel>
+                    ) {
+                        observer.openImageViewer(position, imageView, galleryModels)
                     }
                 }
             )
@@ -551,5 +545,10 @@ class GalleryViewModel : ViewModel() {
         fun captureVideo()
         fun captureImage()
         fun onBackClicked()
+        fun openImageViewer(
+            position: Int,
+            imageView: ImageView,
+            galleryModels: java.util.ArrayList<GalleryModel>
+        )
     }
 }

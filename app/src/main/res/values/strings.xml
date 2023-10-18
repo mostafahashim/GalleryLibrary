@@ -2,4 +2,9 @@
     <string name="app_name">GalleryApp</string>
     <string name="open_gallery" translatable="false">Open Gallery</string>
     <string name="is_dialog">is Dialog</string>
+    <string name="is_show_images">is Show Images</string>
+    <string name="is_show_videos">Is show Videos</string>
+    <string name="selection_count">Selection count</string>
+    <string name="rtl_direction">RTL Direction</string>
+    <string name="ltr_direction">LTR Direction</string>
 </resources>

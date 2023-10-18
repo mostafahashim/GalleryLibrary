@@ -14,12 +14,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/padding_55"
             android:background="@color/white"
             android:gravity="center_vertical">
 
@@ -29,6 +28,7 @@
                 android:layout_height="@dimen/padding_40"
                 android:layout_centerVertical="true"
                 android:adjustViewBounds="true"
+                android:contentDescription="@string/app_name"
                 android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
                 android:onClick="@{()->viewModel.observer.onBackClicked()}"
                 android:padding="@dimen/padding_12"
@@ -125,7 +125,8 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/gray_dark">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcGallery"

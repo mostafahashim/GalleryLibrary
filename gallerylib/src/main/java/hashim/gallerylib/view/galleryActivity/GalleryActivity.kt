@@ -2,7 +2,6 @@ package hashim.gallerylib.view.galleryActivity
 
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -13,17 +12,25 @@ import android.os.*
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
+import android.view.Gravity
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import hashim.gallerylib.R
+import hashim.gallerylib.adapter.RecyclerGalleryAdapter
 import hashim.gallerylib.databinding.ActivityGalleryBinding
+import hashim.gallerylib.imageviewer.ImageViewer
+import hashim.gallerylib.imageviewer.listeners.OnDismissListener
+import hashim.gallerylib.imageviewer.listeners.OnImageChangeListener
+import hashim.gallerylib.imageviewer.loader.ImageLoader
+import hashim.gallerylib.imageviewer.viewer.viewholder.ViewHolderLoader
 import hashim.gallerylib.model.ComparableGalleryModel
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnBottomSheetItemClickListener
@@ -31,9 +38,7 @@ import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
 import hashim.gallerylib.view.GalleryBaseActivity
-import hashim.gallerylib.view.cameraActivity.CustomCameraActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
-import java.io.File
 import java.util.*
 
 
@@ -121,21 +126,6 @@ class GalleryActivity : GalleryBaseActivity(
     }
 
     var PERMISSIONS = ArrayList<String>()
-    fun hasPermissions(context: Context?, permissions: Array<String>): Boolean {
-        if (context != null) {
-            for (p in permissions) {
-                if (ActivityCompat.checkSelfPermission(
-                        context,
-                        p
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
-
     fun checkPermissions(): Boolean {
         PERMISSIONS = ArrayList()
         PERMISSIONS.add(Manifest.permission.CAMERA)
@@ -298,32 +288,55 @@ class GalleryActivity : GalleryBaseActivity(
     override fun captureImage() {
         if (!checkPermissions())
             return
-        val intent = Intent(this@GalleryActivity, CustomCameraActivity::class.java)
-        imageResultLauncher.launch(intent)
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        binding.viewModel?.tempCaptueredFile = DataProvider()
+            .getFile(DataProvider.TYPE_PHOTO_INTERNAL, applicationContext)
+
+        if (binding.viewModel?.tempCaptueredFile != null) {
+            val photoURI = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    this,
+                    applicationContext.packageName + ".provider",
+                    binding.viewModel?.tempCaptueredFile!!
+                )
+            } else {
+                Uri.fromFile(binding.viewModel?.tempCaptueredFile)
+            }
+
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+            imageResultLauncher.launch(takePictureIntent)
+        }
+//        if (!checkPermissions())
+//            return
+//        val intent = Intent(this@GalleryActivity, CameraActivity::class.java)
+//        imageResultLauncher.launch(intent)
     }
 
     private var imageResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK
-            ) {
-                // Tell the media scanner about the new file so that it is
-                // immediately available to the user
-
-                val fileImage = result.data?.extras?.get("ImageFile") as File
-                MediaScannerConnection.scanFile(
-                    this,
-                    arrayOf(fileImage.toString()), null
-                ) { _, _ ->
-                    runOnUiThread {
-                        try {
-                            // prepare model to send it
-                            val customGalleryModel =
-                                GalleryModel()
-                            customGalleryModel.index_when_selected = 1
-                            val itemUrI = DataProvider().getImageURI(
-                                applicationContext, fileImage.path
-                            )
-                            val newUri = Uri.parse(itemUrI)
+            if (result.resultCode == Activity.RESULT_OK && binding.viewModel?.tempCaptueredFile != null) {
+                try {
+                    // Tell the media scanner about the new file so that it is
+                    // immediately available to the user.
+                    MediaScannerConnection.scanFile(
+                        this,
+                        arrayOf(binding.viewModel?.tempCaptueredFile.toString()), null
+                    ) { _, uri ->
+                        runOnUiThread {
+                            val newUri = uri
+                                ?: if (result.data != null && result.data?.data != null) {
+                                    result.data?.data!!
+                                } else {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                        FileProvider.getUriForFile(
+                                            this,
+                                            applicationContext.packageName + ".provider",
+                                            binding.viewModel?.tempCaptueredFile!!
+                                        )
+                                    } else {
+                                        Uri.fromFile(binding.viewModel?.tempCaptueredFile)
+                                    }
+                                }
                             val galleryModel =
                                 binding.viewModel?.getLastCapturedGalleryImage(this, newUri)
                             if (galleryModel != null) {
@@ -332,9 +345,7 @@ class GalleryActivity : GalleryBaseActivity(
                                 binding.viewModel?.recyclerGalleryAdapter?.filter("")
                                 binding.rcGallery.scrollToPosition(0)
                                 binding.viewModel?.recyclerGalleryAdapter?.deselectAll()
-                                binding.viewModel?.recyclerGalleryAdapter?.addItemToTop(
-                                    galleryModel
-                                )
+                                binding.viewModel?.recyclerGalleryAdapter?.addItemToTop(galleryModel)
                                 binding.viewModel?.showHideButtonDone(true)
                             } else {
                                 Toast.makeText(
@@ -343,17 +354,73 @@ class GalleryActivity : GalleryBaseActivity(
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
-                        } catch (e: Exception) {
-                            Toast.makeText(
-                                applicationContext,
-                                R.string.error_while_capture_the_photo_or_video_empty_file,
-                                Toast.LENGTH_LONG
-                            ).show()
+                            return@runOnUiThread
                         }
                     }
+                } catch (e: Exception) {
+                    Log.e("videoError", e.message!!)
+                    e.printStackTrace()
+                    Toast.makeText(
+                        this@GalleryActivity,
+                        R.string.error_while_capture_the_photo_or_video_empty_file,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
+
+    /*  private var imageResultLauncher =
+          registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+              if (result.resultCode == Activity.RESULT_OK
+              ) {
+                  // Tell the media scanner about the new file so that it is
+                  // immediately available to the user
+
+                  val fileImage = result.data?.extras?.get("ImageFile") as File
+                  MediaScannerConnection.scanFile(
+                      this,
+                      arrayOf(fileImage.toString()), null
+                  ) { _, _ ->
+                      runOnUiThread {
+                          try {
+                              // prepare model to send it
+                              val customGalleryModel =
+                                  GalleryModel()
+                              customGalleryModel.index_when_selected = 1
+                              val itemUrI = DataProvider().getImageURI(
+                                  applicationContext, fileImage.path
+                              )
+                              val newUri = Uri.parse(itemUrI)
+                              val galleryModel =
+                                  binding.viewModel?.getLastCapturedGalleryImage(this, newUri)
+                              if (galleryModel != null) {
+                                  binding.viewModel?.selectedAlbumName?.value =
+                                      getString(R.string.all)
+                                  binding.viewModel?.recyclerGalleryAdapter?.filter("")
+                                  binding.rcGallery.scrollToPosition(0)
+                                  binding.viewModel?.recyclerGalleryAdapter?.deselectAll()
+                                  binding.viewModel?.recyclerGalleryAdapter?.addItemToTop(
+                                      galleryModel
+                                  )
+                                  binding.viewModel?.showHideButtonDone(true)
+                              } else {
+                                  Toast.makeText(
+                                      applicationContext,
+                                      R.string.error_while_capture_the_photo_or_video_empty_file,
+                                      Toast.LENGTH_LONG
+                                  ).show()
+                              }
+                          } catch (e: Exception) {
+                              Toast.makeText(
+                                  applicationContext,
+                                  R.string.error_while_capture_the_photo_or_video_empty_file,
+                                  Toast.LENGTH_LONG
+                              ).show()
+                          }
+                      }
+                  }
+              }
+          }*/
 
     private fun getIntentForSelectedItems(
         selected: ArrayList<GalleryModel>?
@@ -373,5 +440,51 @@ class GalleryActivity : GalleryBaseActivity(
     override fun onBackPressed() {
         finish_activity()
         super.onBackPressed()
+    }
+
+    private var viewer: ImageViewer<GalleryModel>? = null
+    override fun openImageViewer(
+        position: Int,
+        imageView: ImageView,
+        galleryModels: ArrayList<GalleryModel>
+    ) {
+        //new list without first item because it add button
+        if (galleryModels.isEmpty())
+            return
+
+        viewer = ImageViewer.Companion.Builder(
+            this,
+            galleryModels,
+            object : ImageLoader<GalleryModel> {
+                override fun loadImage(imageView: ImageView?, model: GalleryModel?) {
+                        Glide.with(this@GalleryActivity).load(model?.url)
+                            .into(imageView!!)
+                }
+            },
+//            CustomViewHolder.buildViewHolder(imageView)
+        ).withStartPosition(position)
+            .withTransitionFrom(imageView)
+            .withImageChangeListener(object : OnImageChangeListener {
+                override fun onImageChange(position: Int) {
+                    binding.rcGallery.scrollToPosition(position)
+                    val holder: RecyclerView.ViewHolder? =
+                        binding.rcGallery.findViewHolderForAdapterPosition(position)
+                    if (holder != null && holder is RecyclerGalleryAdapter.ViewHolder) {
+                        viewer?.updateTransitionImage((holder.binding.ivImage))
+                    }
+
+//                    viewer?.updateTransitionImage(imageView)
+                }
+            }).withDismissListener(object : OnDismissListener {
+                override fun onDismiss() {
+                    //do any thing when dismiss
+                }
+            }).withHiddenStatusBar(false)
+            .withImagesMargin(R.dimen.padding_10)
+            .withContainerPadding(R.dimen.padding_0)
+            .allowZooming(true)
+            .allowSwipeToDismiss(true)
+            .show()
+
     }
 }

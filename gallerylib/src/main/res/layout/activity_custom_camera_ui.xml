@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="hashim.gallerylib.view.cameraActivity.CameraViewModel" />
+    </data>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black">
@@ -10,18 +18,22 @@
         <RelativeLayout
             android:id="@+id/layoutActionBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="@dimen/padding_10">
 
             <ImageView
                 android:id="@+id/ivBack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/padding_40"
+                android:layout_height="@dimen/padding_40"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:adjustViewBounds="true"
-                android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
-                android:padding="@dimen/padding_20"
-                android:src="@drawable/back_white_icon" />
+                android:background="@drawable/circle_bg_transparent_with_transparent_gray_selector"
+                android:contentDescription="@string/app_name"
+                android:onClick="@{()->viewModel.observer.finishWithCancel()}"
+                android:padding="@dimen/padding_10"
+                android:src="@drawable/back_white_icon"
+                app:tint="@color/white" />
 
             <LinearLayout
                 android:id="@+id/layoutDoneRetry"
@@ -29,26 +41,34 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="@{viewModel.isShowDoneRetry()?View.VISIBLE:View.GONE}">
 
                 <ImageView
                     android:id="@+id/ivRetry"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/padding_40"
+                    android:layout_height="@dimen/padding_40"
+                    android:layout_gravity="center_vertical"
                     android:adjustViewBounds="true"
-                    android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
-                    android:padding="@dimen/padding_20"
-                    android:src="@drawable/close_white_icon" />
+                    android:background="@drawable/circle_bg_transparent_with_transparent_gray_selector"
+                    android:contentDescription="@string/app_name"
+                    android:onClick="@{()->viewModel.prepareNewImageViews()}"
+                    android:padding="@dimen/padding_10"
+                    android:src="@drawable/close_white_icon"
+                    app:tint="@color/white" />
 
                 <ImageView
                     android:id="@+id/ivDone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/padding_40"
+                    android:layout_height="@dimen/padding_40"
                     android:layout_marginStart="@dimen/padding_20"
                     android:adjustViewBounds="true"
-                    android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
-                    android:padding="@dimen/padding_20"
-                    android:src="@drawable/done_white_icon" />
+                    android:background="@drawable/circle_bg_transparent_with_transparent_gray_selector"
+                    android:contentDescription="@string/app_name"
+                    android:onClick="@{()->viewModel.saveCapturedFile()}"
+                    android:padding="@dimen/padding_10"
+                    android:src="@drawable/done_white_icon"
+                    app:tint="@color/white" />
             </LinearLayout>
 
             <RelativeLayout
@@ -57,41 +77,52 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/layoutDoneRetry"
-                android:layout_toEndOf="@id/ivBack">
+                android:layout_toEndOf="@id/ivBack"
+                android:visibility="@{viewModel.isShowFlash()?View.VISIBLE:View.GONE}">
 
                 <ImageView
                     android:id="@+id/iv_camera_flash_off"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/padding_40"
+                    android:layout_height="@dimen/padding_40"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/iv_camera_flash_auto"
-                    android:alpha="0.4"
-                    android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                    android:adjustViewBounds="true"
+                    android:alpha="@{viewModel.flashType==0?1f:.4f}"
+                    android:background="@drawable/circle_bg_transparent_with_transparent_gray_selector"
                     android:contentDescription="@string/app_name"
-                    android:padding="@dimen/padding_15"
-                    android:src="@drawable/ic_flash_off" />
+                    android:onClick="@{()->viewModel.setFlashType(0)}"
+                    android:padding="@dimen/padding_10"
+                    android:src="@drawable/ic_flash_off"
+                    app:tint="@color/white" />
 
                 <ImageView
                     android:id="@+id/iv_camera_flash_on"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/padding_40"
+                    android:layout_height="@dimen/padding_40"
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@+id/iv_camera_flash_auto"
-                    android:alpha="0.4"
-                    android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                    android:adjustViewBounds="true"
+                    android:alpha="@{viewModel.flashType==1?1f:.4f}"
+                    android:background="@drawable/circle_bg_transparent_with_transparent_gray_selector"
                     android:contentDescription="@string/app_name"
-                    android:padding="@dimen/padding_15"
-                    android:src="@drawable/ic_flash_on" />
+                    android:onClick="@{()->viewModel.setFlashType(1)}"
+                    android:padding="@dimen/padding_10"
+                    android:src="@drawable/ic_flash_on"
+                    app:tint="@color/white" />
 
                 <ImageView
                     android:id="@+id/iv_camera_flash_auto"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/padding_40"
+                    android:layout_height="@dimen/padding_40"
                     android:layout_centerInParent="true"
-                    android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_transparent"
+                    android:adjustViewBounds="true"
+                    android:alpha="@{viewModel.flashType==2?1f:.4f}"
+                    android:background="@drawable/circle_bg_transparent_with_transparent_gray_selector"
                     android:contentDescription="@string/app_name"
-                    android:padding="@dimen/padding_15"
-                    android:src="@drawable/ic_flash_auto" />
+                    android:onClick="@{()->viewModel.setFlashType(2)}"
+                    android:padding="@dimen/padding_10"
+                    android:src="@drawable/ic_flash_auto"
+                    app:tint="@color/white" />
 
 
             </RelativeLayout>
@@ -104,7 +135,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:padding="@dimen/padding_20">
+            android:padding="@dimen/padding_20"
+            android:visibility="@{viewModel.isShowCapture()?View.VISIBLE:View.GONE}">
 
             <ImageView
                 android:id="@+id/ivSwitchCamera"
@@ -113,38 +145,43 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="@dimen/padding_20"
+                android:adjustViewBounds="true"
                 android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
                 android:contentDescription="@string/app_name"
-                android:padding="@dimen/padding_20"
-                android:src="@drawable/ic_camera_rotation" />
+                android:onClick="@{()->viewModel.switchCamera()}"
+                android:padding="@dimen/padding_10"
+                android:src="@drawable/ic_camera_rotation"
+                app:tint="@color/white" />
 
             <ImageView
                 android:id="@+id/iv_capture_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:adjustViewBounds="true"
                 android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
                 android:contentDescription="@string/app_name"
+                android:onClick="@{()->viewModel.startCapture()}"
                 android:padding="@dimen/padding_20"
-                android:src="@drawable/camera_menu_icn" />
+                android:src="@drawable/camera_menu_icn"
+                app:tint="@color/white" />
 
         </RelativeLayout>
 
-        <hashim.gallerylib.cameraCore.AutoFitTextureView
-            android:id="@+id/cameraView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/layoutCapture"
-            android:layout_below="@id/layoutActionBar"
-            android:adjustViewBounds="true"
-            android:keepScreenOn="true" />
-
-        <FrameLayout
-            android:id="@+id/cameraPreviewPreLoliPop"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/layoutCapture"
-            android:layout_below="@id/layoutActionBar" />
+            android:layout_below="@id/layoutActionBar"
+            android:visibility="@{viewModel.isShowCameraView()?View.VISIBLE:View.GONE}">
+
+            <hashim.gallerylib.cameraCore.AutoFitTextureView
+                android:id="@+id/cameraView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:keepScreenOn="true" />
+        </RelativeLayout>
+
 
         <ImageView
             android:id="@+id/ivImageCaptured"
@@ -152,7 +189,11 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/layoutCapture"
             android:layout_below="@id/layoutActionBar"
-            android:background="@color/black" />
+            android:adjustViewBounds="true"
+            android:background="@color/black"
+            android:contentDescription="@string/app_name"
+            android:visibility="@{viewModel.isShowImageCaptured()?View.VISIBLE:View.GONE}"
+            app:imageBitmap="@{viewModel.capturedBitmap}" />
 
     </RelativeLayout>
 </layout>

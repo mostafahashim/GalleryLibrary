@@ -30,9 +30,11 @@ class DataProvider {
     var GalleryTypeImages = "Images"
     var GalleryTypeVideos = "Videos"
 
-    val TYPE_PHOTO_INTERNAL = "2"
-    val TYPE_VIDEO_INTERNAL = "4"
-    val TYPE_TEMP = "12"
+    companion object {
+        val TYPE_PHOTO_INTERNAL = "2"
+        val TYPE_VIDEO_INTERNAL = "4"
+        val TYPE_TEMP = "12"
+    }
 
     @SuppressLint("Range")
     fun getThumbnail(activity: Activity, path: String): Bitmap {
@@ -108,6 +110,7 @@ class DataProvider {
                 extention = ".mp4"
                 Type = "VID_"
             }
+
             TYPE_PHOTO_INTERNAL -> {
                 file = File(
                     _filepath,
@@ -118,6 +121,7 @@ class DataProvider {
                 extention = ".jpg"
                 Type = "IMG_"
             }
+
             else -> {
             }
         }
@@ -155,6 +159,7 @@ class DataProvider {
                 extention = ".mp4"
                 Type = "VID_"
             }
+
             TYPE_PHOTO_INTERNAL -> {
                 file = File(
                     _filepath,
@@ -165,6 +170,7 @@ class DataProvider {
                 extention = ".jpg"
                 Type = "IMG_"
             }
+
             TYPE_TEMP -> {
                 file = File(
                     _filepath,
@@ -175,6 +181,7 @@ class DataProvider {
                 extention = ".jpg"
                 Type = "IMG_"
             }
+
             else -> {
             }
         }
@@ -200,10 +207,12 @@ class DataProvider {
                 extention = ".mp4"
                 Type = "VID_"
             }
+
             TYPE_PHOTO_INTERNAL -> {
                 extention = ".jpg"
                 Type = "IMG_"
             }
+
             else -> {
                 val arr = path.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 if (arr.size > 1) extention = "." + arr[arr.size - 1]
@@ -387,6 +396,7 @@ class DataProvider {
                     bitmap = rotateBitmap(bitmap, 180)
                     bitmap = rotateBitmap(bitmap, -90)
                 }
+
                 ExifInterface.ORIENTATION_ROTATE_270 -> bitmap = rotateBitmap(bitmap, -90)
                 ExifInterface.ORIENTATION_NORMAL -> bitmap = rotateBitmap(bitmap, 0)
                 ExifInterface.ORIENTATION_TRANSVERSE -> bitmap = rotateBitmap(bitmap, -90)

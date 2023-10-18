@@ -1,5 +1,7 @@
 package hashim.gallerylib.util
 
+import android.app.Activity
+import android.content.Context
 import android.content.res.Resources
 import android.graphics.Insets
 import android.graphics.Point
@@ -44,7 +46,16 @@ class ScreenSizeUtils {
         }
     }
 
-    fun getScreenWidth(activity: AppCompatActivity): Int {
+    fun getScreenWidth(context: Context): Int {
+        return try {
+            val displayMetrics = context.resources.displayMetrics
+            return displayMetrics.widthPixels
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+    fun getScreenWidth(activity: Activity): Int {
         return try {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val windowMetrics = activity.windowManager.currentWindowMetrics
@@ -61,7 +72,7 @@ class ScreenSizeUtils {
         }
     }
 
-    fun getScreenHeight(activity: AppCompatActivity): Int {
+    fun getScreenHeight(activity: Activity): Int {
         return try {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val windowMetrics = activity.windowManager.currentWindowMetrics
