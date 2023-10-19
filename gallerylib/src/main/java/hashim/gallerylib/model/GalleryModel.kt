@@ -1,5 +1,6 @@
 package hashim.gallerylib.model
 
+import androidx.media3.exoplayer.ExoPlayer
 import java.io.Serializable
 import java.util.Comparator
 
@@ -23,6 +24,6 @@ data class GalleryModel(
     var columnWidth: Double = 0.0,
     var columnHeight: Double = 0.0,
 ) : Serializable {
-
+    var player: ExoPlayer? = null
 
 }

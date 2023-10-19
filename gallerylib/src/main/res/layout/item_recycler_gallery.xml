@@ -18,9 +18,9 @@
     <androidx.cardview.widget.CardView
         android:layout_width="@dimen/padding_115"
         android:layout_height="@dimen/padding_115"
-        android:layout_margin="@dimen/padding_2"
+        android:layout_margin="@dimen/padding_1"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="@dimen/padding_8"
+        app:cardCornerRadius="@dimen/padding_0"
         app:cardElevation="@dimen/padding_1"
         app:cardUseCompatPadding="false"
         app:contentPadding="@dimen/padding_0"
@@ -38,12 +38,11 @@
                 android:id="@+id/ivImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_centerInParent="true"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/app_name"
                 android:scaleType="centerCrop"
                 android:src="@drawable/round_5_bg_gray_light"
-                app:imageUrlRoundRect="@{model.url}" />
+                app:imageUrlRect="@{model.url}" />
 
             <ImageView
                 android:id="@+id/ivVideo"
@@ -51,7 +50,6 @@
                 android:layout_height="@dimen/padding_22"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentBottom="true"
-                android:layout_centerInParent="true"
                 android:layout_marginStart="@dimen/padding_7"
                 android:layout_marginTop="@dimen/padding_7"
                 android:layout_marginEnd="@dimen/padding_7"

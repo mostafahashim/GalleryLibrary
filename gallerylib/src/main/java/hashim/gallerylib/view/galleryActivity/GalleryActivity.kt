@@ -12,24 +12,23 @@ import android.os.*
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import android.view.Gravity
-import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.github.chrisbanes.photoview.PhotoView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import hashim.gallerylib.R
 import hashim.gallerylib.adapter.RecyclerGalleryAdapter
-import hashim.gallerylib.databinding.ActivityGalleryBinding
+import hashim.gallerylib.databinding.BottomSheetGalleryBinding
 import hashim.gallerylib.imageviewer.ImageViewer
 import hashim.gallerylib.imageviewer.listeners.OnDismissListener
 import hashim.gallerylib.imageviewer.listeners.OnImageChangeListener
 import hashim.gallerylib.imageviewer.loader.ImageLoader
+import hashim.gallerylib.imageviewer.viewer.viewholder.DefaultViewHolder
 import hashim.gallerylib.imageviewer.viewer.viewholder.ViewHolderLoader
 import hashim.gallerylib.model.ComparableGalleryModel
 import hashim.gallerylib.model.GalleryModel
@@ -47,10 +46,10 @@ class GalleryActivity : GalleryBaseActivity(
     false, true, true
 ), GalleryViewModel.Observer {
 
-    lateinit var binding: ActivityGalleryBinding
+    lateinit var binding: BottomSheetGalleryBinding
 
     override fun doOnCreate(arg0: Bundle?) {
-        binding = putContentView(R.layout.activity_gallery) as ActivityGalleryBinding
+        binding = putContentView(R.layout.bottom_sheet_gallery) as BottomSheetGalleryBinding
         binding.viewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
         binding.viewModel?.observer = this
         binding.lifecycleOwner = this
@@ -64,11 +63,12 @@ class GalleryActivity : GalleryBaseActivity(
             intent.extras!!.get(GalleryConstants.selected) as ArrayList<GalleryModel>
         binding.viewModel?.maxSelectionCount =
             intent.getIntExtra(GalleryConstants.maxSelectionCount, 50)
+        binding.viewModel?.columnsNumber?.value =
+            intent.getIntExtra(GalleryConstants.gridColumnsCount, 3)
         binding.viewModel?.showType =
             intent.getStringExtra(GalleryConstants.showType) ?: GalleryConstants.GalleryTypeImages
 
         binding.viewModel?.initGalleryAdapter(ScreenSizeUtils().getScreenWidth(this))
-//        binding.viewModel?.updateBooksAdapterColumnWidth(ScreenSizeUtils().getScreenWidth(this))
         binding.viewModel?.initializeCameraButtons()
         fetchData()
     }
@@ -453,15 +453,23 @@ class GalleryActivity : GalleryBaseActivity(
             return
 
         viewer = ImageViewer.Companion.Builder(
-            this,
-            galleryModels,
-            object : ImageLoader<GalleryModel> {
+            context = this,
+            images = galleryModels,
+            imageLoader = object : ImageLoader<GalleryModel> {
                 override fun loadImage(imageView: ImageView?, model: GalleryModel?) {
-                        Glide.with(this@GalleryActivity).load(model?.url)
-                            .into(imageView!!)
+                    Glide.with(this@GalleryActivity).load(model?.url)
+                        .into(imageView!!)
                 }
             },
-//            CustomViewHolder.buildViewHolder(imageView)
+            viewHolderLoader = object : ViewHolderLoader<GalleryModel> {
+                override fun loadViewHolder(
+                    photoView: PhotoView,
+                ): DefaultViewHolder<GalleryModel> {
+                    return GalleryPagerViewHolder.buildViewHolder(
+                        photoView,
+                    )
+                }
+            }
         ).withStartPosition(position)
             .withTransitionFrom(imageView)
             .withImageChangeListener(object : OnImageChangeListener {

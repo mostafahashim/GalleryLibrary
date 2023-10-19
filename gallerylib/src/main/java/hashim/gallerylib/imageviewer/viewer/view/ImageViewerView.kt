@@ -1,19 +1,3 @@
-/*
- * Copyright 2018 stfalcon.com
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package hashim.gallerylib.imageviewer.viewer.view
 
 import android.content.Context
@@ -45,7 +29,7 @@ import hashim.gallerylib.imageviewer.common.gestures.direction.SwipeDirection.RI
 import hashim.gallerylib.imageviewer.common.gestures.direction.SwipeDirection.UP
 import hashim.gallerylib.imageviewer.common.gestures.direction.SwipeDirectionDetector
 import hashim.gallerylib.imageviewer.common.gestures.dismiss.SwipeToDismissHandler
-import hashim.gallerylib.imageviewer.common.pager.MultiTouchViewPager
+import hashim.gallerylib.imageviewer.common.pager.TouchViewPager
 import hashim.gallerylib.imageviewer.loader.ImageLoader
 import hashim.gallerylib.imageviewer.viewer.adapter.ImagesPagerAdapter
 import hashim.gallerylib.imageviewer.viewer.viewholder.DefaultViewHolderLoader
@@ -94,7 +78,7 @@ internal class ImageViewerView<T> @JvmOverloads constructor(
     private val transitionImageView: ImageView
     private var externalTransitionImageView: ImageView? = null
 
-    private var imagesPager: MultiTouchViewPager
+    private var imagesPager: TouchViewPager
     private var imagesAdapter: ImagesPagerAdapter<T>? = null
 
     private var directionDetector: SwipeDirectionDetector
@@ -199,6 +183,7 @@ internal class ImageViewerView<T> @JvmOverloads constructor(
             context, images, imageLoader, isZoomingAllowed,
             viewHolderLoader ?: DefaultViewHolderLoader()
         )
+        this.imagesPager.offscreenPageLimit = 1
         this.imagesPager.adapter = imagesAdapter as ImagesPagerAdapter<T>
         this.startPosition = startPosition
     }
@@ -268,15 +253,10 @@ internal class ImageViewerView<T> @JvmOverloads constructor(
             onTransitionEnd = { onDismiss?.invoke() })
     }
 
-//    private fun prepareViewsForTransition() {
-//        transitionImageContainer.makeVisible()
-//        imagesPager.makeGone()
-//    }
-
     private fun prepareViewsForTransition() {
         transitionImageContainer.makeVisible()
         imagesPager.makeGone()
-        (imagesPager.adapter as? ImagesPagerAdapter<T>)?.onDialogClosed()
+        (imagesPager.adapter as? ImagesPagerAdapter<*>)?.onDialogClosed()
     }
 
     private fun prepareViewsForViewer() {

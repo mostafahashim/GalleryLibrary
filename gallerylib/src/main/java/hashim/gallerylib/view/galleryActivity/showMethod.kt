@@ -19,9 +19,10 @@ class GalleryLib(var myActivity: AppCompatActivity) {
         selectionType: String,
         locale: String,
         maxSelectionCount: Int,
+        gridColumnsCount: Int,
         selected: ArrayList<GalleryModel>,
         onResultCallback: OnResultCallback,
-        galleryResultLauncher :  ActivityResultLauncher<Intent>
+        galleryResultLauncher: ActivityResultLauncher<Intent>
     ) {
         myOnResultCallback = onResultCallback
         if (isDialog) {
@@ -29,6 +30,7 @@ class GalleryLib(var myActivity: AppCompatActivity) {
             val bundle = Bundle()
             bundle.putSerializable(GalleryConstants.selected, selected)
             bundle.putSerializable(GalleryConstants.maxSelectionCount, maxSelectionCount)
+            bundle.putSerializable(GalleryConstants.gridColumnsCount, gridColumnsCount)
             bundle.putSerializable(GalleryConstants.showType, selectionType)
             bundle.putSerializable(GalleryConstants.Language, locale)
 
@@ -45,6 +47,7 @@ class GalleryLib(var myActivity: AppCompatActivity) {
                 it.putExtra(GalleryConstants.showType, selectionType)
                 it.putExtra(GalleryConstants.selected, selected)
                 it.putExtra(GalleryConstants.Language, locale)
+                it.putExtra(GalleryConstants.gridColumnsCount, gridColumnsCount)
 
                 galleryResultLauncher.launch(it)
             }

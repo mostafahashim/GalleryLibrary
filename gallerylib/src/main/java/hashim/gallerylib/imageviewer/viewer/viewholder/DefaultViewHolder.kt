@@ -1,14 +1,14 @@
 package hashim.gallerylib.imageviewer.viewer.viewholder
 
 import android.view.View
+import android.view.ViewGroup
 import com.github.chrisbanes.photoview.PhotoView
 import hashim.gallerylib.imageviewer.common.extensions.resetScale
 import hashim.gallerylib.imageviewer.common.pager.RecyclingPagerAdapter
 import hashim.gallerylib.imageviewer.loader.ImageLoader
 import hashim.gallerylib.imageviewer.viewer.adapter.ImagesPagerAdapter
 
-open class DefaultViewHolder<T>(itemView: View) : RecyclingPagerAdapter.ViewHolder(itemView),
-    ViewHolderLoader<T> {
+open class DefaultViewHolder<T>(itemView: View) : RecyclingPagerAdapter.ViewHolder(itemView) {
 
     internal var imageLoader: ImageLoader<T>? = null
 
@@ -25,18 +25,16 @@ open class DefaultViewHolder<T>(itemView: View) : RecyclingPagerAdapter.ViewHold
     // Subclasses can respond to Back button presses here when isScaled() returns True
     open fun resetScale() = photoView?.resetScale(animate = true)
 
-    open fun bind(position: Int, image: T) {
+    open fun bind(position: Int, model: T) {
         this.position = position
-        imageLoader?.loadImage(photoView, image)
+        imageLoader?.loadImage(photoView, model)
     }
 
     // Subclasses may respond when the dialog window is closed (e.g. to stop video playback)
-    open fun onDialogClosed() {}
+    open fun onDialogClosed(position: Int, model: T) {}
 
     // Subclasses may respond when this ViewHolder's View moves on or off the screen
-    open fun setIsVisible(isVisible: Boolean) {}
-    override fun loadViewHolder(photoView: PhotoView): DefaultViewHolder<T> {
-        return this
-    }
+    open fun setIsVisible(isVisible: Boolean, position: Int, model: T) {}
+    open fun destroyItem(parent: ViewGroup, position: Int, model: T) {}
 
 }

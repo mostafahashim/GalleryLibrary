@@ -1,19 +1,3 @@
-/*
- * Copyright 2018 stfalcon.com
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package hashim.gallerylib.imageviewer.viewer.adapter
 
 import android.content.Context
@@ -45,7 +29,15 @@ internal class ImagesPagerAdapter<T>(
     fun isScaled(position: Int): Boolean =
         holders.firstOrNull { it.position == position }?.isScaled() ?: false
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DefaultViewHolder<T> {
+    override fun destroyItem(parent: ViewGroup, position: Int, item: Any) {
+        holders.firstOrNull { it.position == position }?.destroyItem(parent, position, images[position])
+            ?: false
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): DefaultViewHolder<T> {
         val photoView = PhotoView(context).apply {
             id = photoViewId
             isEnabled = isZoomingAllowed
@@ -54,10 +46,12 @@ internal class ImagesPagerAdapter<T>(
 
         return viewHolderLoader.loadViewHolder(photoView).also {
             it.imageLoader = imageLoader
-            holders.add(it) }
+            holders.add(it)
+        }
     }
 
-    override fun onBindViewHolder(holder: DefaultViewHolder<T>, position: Int) = holder.bind(position, images[position])
+    override fun onBindViewHolder(holder: DefaultViewHolder<T>, position: Int) =
+        holder.bind(position, images[position])
 
     override fun getItemCount() = images.size
 
@@ -69,7 +63,12 @@ internal class ImagesPagerAdapter<T>(
     internal fun resetScale(position: Int) =
         holders.firstOrNull { it.position == position }?.resetScale()
 
-    fun onDialogClosed() = holders.forEach { it.onDialogClosed() }
+    fun onDialogClosed() = holders.forEach {
+        it.onDialogClosed(
+            it.position,
+            images[it.position]
+        )
+    }
 
     override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any) {
         super.setPrimaryItem(container, position, `object`)
@@ -77,7 +76,14 @@ internal class ImagesPagerAdapter<T>(
         // Only fire when the primary item has actually changed
         if (position != primaryPos) {
             primaryPos = position
-            holders.forEach { it.setIsVisible(it.position == primaryPos) }
+            holders.forEach {
+                it.setIsVisible(
+                    it.position == primaryPos,
+                    it.position,
+                    images[it.position]
+                )
+            }
         }
     }
+
 }

@@ -7,4 +7,5 @@
     <string name="selection_count">Selection count</string>
     <string name="rtl_direction">RTL Direction</string>
     <string name="ltr_direction">LTR Direction</string>
+    <string name="grid_columns">Grid Columns</string>
 </resources>

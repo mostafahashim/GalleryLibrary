@@ -73,6 +73,7 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="behavior_fitToContents">true</item>
     </style>
 
     <style name="DialogAnimation" parent="Animation.AppCompat.Dialog">

@@ -10,6 +10,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.databinding.BindingAdapter
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.MultiTransformation
@@ -21,6 +23,11 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
 class CustomViewBindings {
     companion object {
+        @BindingAdapter("spanCount")
+        @JvmStatic
+        fun spanCount(recyclerView: RecyclerView, spanCount: Int) {
+            (recyclerView.layoutManager as GridLayoutManager).spanCount = spanCount
+        }
         @BindingAdapter("imageBitmap")
         @JvmStatic
         fun loadImageBitmap(imageView: ImageView, bitmap: Bitmap?) {

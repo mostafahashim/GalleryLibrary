@@ -12,6 +12,7 @@ object GalleryConstants {
     const val Language = "localeLanguage"
     const val selected = "selected"
     const val maxSelectionCount = "MaxPhotosNumber"
+    const val gridColumnsCount = "GridColumnsCount"
     const val showType = "showType"
     const val ARABIC = "ar"
     const val ENGLISH = "en"

@@ -83,6 +83,8 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
             locale = if (binding.viewModel?.isRTL?.value!!) "ar" else "en",
             maxSelectionCount = if (binding.viewModel?.count?.value?.isNotEmpty() == true) binding.viewModel?.count?.value?.toInt()!!
             else 1,
+            gridColumnsCount = if (binding.viewModel?.columns?.value?.isNotEmpty() == true) binding.viewModel?.columns?.value?.toInt()!!
+            else 4,
             selected = galleryModels,
             onResultCallback = object : OnResultCallback {
                 override fun onResult(list: ArrayList<GalleryModel>) {

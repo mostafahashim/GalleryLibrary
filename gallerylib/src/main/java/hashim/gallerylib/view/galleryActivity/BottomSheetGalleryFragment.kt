@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,13 +24,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_SETTLING
+import com.github.chrisbanes.photoview.PhotoView
+import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
+import com.google.android.material.bottomsheet.BottomSheetBehavior.SAVE_FIT_TO_CONTENTS
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import hashim.gallerylib.R
@@ -39,6 +41,8 @@ import hashim.gallerylib.imageviewer.ImageViewer
 import hashim.gallerylib.imageviewer.listeners.OnDismissListener
 import hashim.gallerylib.imageviewer.listeners.OnImageChangeListener
 import hashim.gallerylib.imageviewer.loader.ImageLoader
+import hashim.gallerylib.imageviewer.viewer.viewholder.DefaultViewHolder
+import hashim.gallerylib.imageviewer.viewer.viewholder.ViewHolderLoader
 import hashim.gallerylib.model.ComparableGalleryModel
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnBottomSheetItemClickListener
@@ -107,11 +111,16 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+//        (dialog as? BottomSheetDialog)?.behavior?.state = BottomSheetBehavior.STATE_HIDDEN
+        val bottomSheetBehavior = (dialog as? BottomSheetDialog)?.behavior
+
 
         binding.viewModel?.selectedPhotos =
             requireArguments()[GalleryConstants.selected] as ArrayList<GalleryModel>
         binding.viewModel?.maxSelectionCount =
             requireArguments().getInt(GalleryConstants.maxSelectionCount, 50)
+        binding.viewModel?.columnsNumber?.value =
+            requireArguments().getInt(GalleryConstants.gridColumnsCount, 3)
         binding.viewModel?.showType = requireArguments().getString(
             GalleryConstants.showType,
             GalleryConstants.GalleryTypeImages
@@ -459,12 +468,21 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             return
 
         viewer = ImageViewer.Companion.Builder(
-            activity,
-            galleryModels,
-            object : ImageLoader<GalleryModel> {
+            context = activity,
+            images = galleryModels,
+            imageLoader = object : ImageLoader<GalleryModel> {
                 override fun loadImage(imageView: ImageView?, image: GalleryModel?) {
                     Glide.with(activity).load(image?.url)
                         .into(imageView!!)
+                }
+            },
+            viewHolderLoader = object : ViewHolderLoader<GalleryModel> {
+                override fun loadViewHolder(
+                    photoView: PhotoView,
+                ): DefaultViewHolder<GalleryModel> {
+                    return GalleryPagerViewHolder.buildViewHolder(
+                        photoView,
+                    )
                 }
             }
         ).withStartPosition(position)

@@ -37,8 +37,9 @@ class GalleryViewModel : ViewModel() {
     lateinit var recyclerGalleryAdapter: RecyclerGalleryAdapter
 
 
+    var columnsNumber = MutableLiveData(0)
     fun initGalleryAdapter(screenWidth: Int) {
-        val columnWidth = (110.00 * screenWidth) / 360.00
+        val columnWidth = ((352.00 / columnsNumber.value!!) * screenWidth) / 360.00
 
         recyclerGalleryAdapter =
             RecyclerGalleryAdapter(columnWidth,

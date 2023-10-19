@@ -229,7 +229,7 @@ open class RtlViewPager : ViewPager {
         }
 
         private fun reverse(position: Int): Int {
-            val adapter: PagerAdapter = getAdapter()
+            val adapter: PagerAdapter = adapter
             return if (adapter == null) position else adapter.count - position - 1
         }
     }

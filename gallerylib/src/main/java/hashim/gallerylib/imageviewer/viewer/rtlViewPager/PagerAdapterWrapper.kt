@@ -40,6 +40,7 @@ open class PagerAdapterWrapper(var adapter: PagerAdapter) : PagerAdapter() {
         adapter.destroyItem(container, position, `object`)
     }
 
+
     override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any) {
         adapter.setPrimaryItem(container, position, `object`)
     }
