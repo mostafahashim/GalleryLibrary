@@ -5,7 +5,7 @@ android library for gallery images and videos, and capture camera image and vide
 [![](https://jitpack.io/v/mostafahashim/GalleryLibrary.svg)](https://jitpack.io/#mostafahashim/GalleryLibrary)
 
 ## Step 1. Add the JitPack repository to your build file
-## Add it in your root build.gradle at the end of repositories:
+## Add it in your root build.gradle at the end of repositories or settings.gradle:
  ```groovy
   dependencyResolutionManagement {
         repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -20,30 +20,39 @@ android library for gallery images and videos, and capture camera image and vide
 
 ```groovy
 
-    implementation 'com.github.mostafahashim:GalleryLibrary:1.1.8'
+    implementation 'com.github.mostafahashim:GalleryLibrary:1.1.9'
 
 ```
 # Usage
 ```kotlin
-val galleryModels = ArrayList<GalleryModel>()
-        galleryModels.addAll(binding.viewModel!!.galleryModels)
+fun openGallery() {
+    val galleryModels = ArrayList<GalleryModel>()
+    galleryModels.addAll(binding.viewModel!!.galleryModels)
 
-        GalleryLib(this).showGallery(
-            isDialog = binding.viewModel?.isDialog?.value ?: false,
-            selectionType = GalleryConstants.GalleryTypeImages,
-            locale = Preferences.getApplicationLocale(),
-            maxSelectionCount = 40,
-            selected = galleryModels,
-            onResultCallback = object : OnResultCallback {
-                override fun onResult(list: ArrayList<GalleryModel>) {
-                    binding.viewModel?.galleryModels = list
-                    binding.viewModel?.recyclerGalleryAdapter?.setList(
-                        binding.viewModel?.galleryModels ?: ArrayList()
-                    )
-                }
-            },
-            galleryResultLauncher = galleryResultLauncher
-        )
+    GalleryLib(this).showGallery(
+        isDialog = binding.viewModel?.isDialog?.value ?: false,
+        selectionType = if (binding.viewModel?.isShowImages?.value!! && binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeImagesAndVideos
+        else if (binding.viewModel?.isShowImages?.value!!) GalleryConstants.GalleryTypeImages
+        else if (binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeVideos
+        else GalleryConstants.GalleryTypeImagesAndVideos,
+        //locale only for activity view, dialog view will work on application locale
+        locale = if (binding.viewModel?.isRTL?.value!!) "ar" else "en",
+        maxSelectionCount = if (binding.viewModel?.count?.value?.isNotEmpty() == true) binding.viewModel?.count?.value?.toInt()!!
+        else 1,
+        gridColumnsCount = if (binding.viewModel?.columns?.value?.isNotEmpty() == true) binding.viewModel?.columns?.value?.toInt()!!
+        else 4,
+        selected = galleryModels,
+        onResultCallback = object : OnResultCallback {
+            override fun onResult(list: ArrayList<GalleryModel>) {
+                binding.viewModel?.galleryModels = list
+                binding.viewModel?.recyclerGalleryAdapter?.setList(
+                    binding.viewModel?.galleryModels ?: ArrayList()
+                )
+            }
+        },
+        galleryResultLauncher = galleryResultLauncher
+    )
+}
 
 ```
 and this activity result if you need to launch activity not dialog

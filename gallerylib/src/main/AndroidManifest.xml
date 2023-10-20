@@ -46,7 +46,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:replace="android:allowBackup,android:supportsRtl">
+        tools:replace="android:allowBackup,android:supportsRtl,android:theme,android:hardwareAccelerated">
 
         <activity
             android:name="hashim.gallerylib.view.galleryActivity.GalleryActivity"

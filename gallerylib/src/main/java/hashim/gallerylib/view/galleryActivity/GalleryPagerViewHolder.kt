@@ -92,6 +92,8 @@ class GalleryPagerViewHolder<T> constructor(
     override fun bind(position: Int, model: T) {
         val galleryModel = model as GalleryModel
         if (model.player != null) model.player?.playWhenReady = false
+        binding.imgviewSelect.visibility = View.GONE
+        binding.tvCounter.visibility = View.GONE
         if (galleryModel.type.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
             haveVideo = true
             imageView.visibility = View.GONE
@@ -119,7 +121,7 @@ class GalleryPagerViewHolder<T> constructor(
         }, 10)
     }
 
-    override fun destroyItem(parent: ViewGroup, position: Int, model:T) {
+    override fun destroyItem(parent: ViewGroup, position: Int, model: T) {
         model as GalleryModel
         if (model.player != null)
             model.player?.release()

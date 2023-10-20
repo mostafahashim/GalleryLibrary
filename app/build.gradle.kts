@@ -56,7 +56,6 @@ dependencies {
     //glide
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     // If you want to use the GPU Filters
-    implementation("jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1")
     implementation("com.github.bumptech.glide:okhttp3-integration:4.13.0@aar")
     implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation("com.github.2coffees1team:GlideToVectorYou:v2.0.0")
