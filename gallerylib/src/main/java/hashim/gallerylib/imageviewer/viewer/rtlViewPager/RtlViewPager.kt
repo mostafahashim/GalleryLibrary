@@ -31,7 +31,7 @@ open class RtlViewPager : ViewPager {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        registerRtlDataSetObserver(super.getAdapter()!!)
+        registerRtlDataSetObserver(super.getAdapter())
     }
 
     override fun onDetachedFromWindow() {
@@ -39,8 +39,8 @@ open class RtlViewPager : ViewPager {
         super.onDetachedFromWindow()
     }
 
-    private fun registerRtlDataSetObserver(adapter: PagerAdapter) {
-        if (adapter is ReverseAdapter && dataSetObserver == null) {
+    private fun registerRtlDataSetObserver(adapter: PagerAdapter?) {
+        if (adapter!=null && adapter is ReverseAdapter && dataSetObserver == null) {
             dataSetObserver = RevalidateIndicesOnContentChange(adapter)
             adapter.registerDataSetObserver(dataSetObserver!!)
             adapter.revalidateIndices()
