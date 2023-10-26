@@ -21,11 +21,11 @@ class GalleryLib(var myActivity: AppCompatActivity) {
         maxSelectionCount: Int,
         gridColumnsCount: Int,
         selected: ArrayList<GalleryModel>,
-        onResultCallback: OnResultCallback,
-        galleryResultLauncher: ActivityResultLauncher<Intent>
+        onResultCallback: OnResultCallback?,
+        galleryResultLauncher: ActivityResultLauncher<Intent>?
     ) {
-        myOnResultCallback = onResultCallback
-        if (isDialog) {
+        if (isDialog && onResultCallback != null) {
+            myOnResultCallback = onResultCallback
             val bottomSheetFragment = BottomSheetGalleryFragment()
             val bundle = Bundle()
             bundle.putSerializable(GalleryConstants.selected, selected)
@@ -37,11 +37,13 @@ class GalleryLib(var myActivity: AppCompatActivity) {
             bottomSheetFragment.arguments = bundle
             bottomSheetFragment.onResultCallback = object : OnResultCallback {
                 override fun onResult(list: ArrayList<GalleryModel>) {
-                    onResultCallback.onResult(list)
+                    onResultCallback?.onResult(list)
                 }
             }
             bottomSheetFragment.show(myActivity.supportFragmentManager, bottomSheetFragment.tag)
         } else {
+            if (galleryResultLauncher == null)
+                return
             Intent(myActivity, GalleryActivity::class.java).also {
                 it.putExtra(GalleryConstants.maxSelectionCount, maxSelectionCount)
                 it.putExtra(GalleryConstants.showType, selectionType)
