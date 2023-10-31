@@ -93,6 +93,10 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
                         binding.viewModel?.galleryModels ?: ArrayList()
                     )
                 }
+
+                override fun onDismiss() {
+
+                }
             },
             galleryResultLauncher = galleryResultLauncher
         )

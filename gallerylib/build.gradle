@@ -88,7 +88,7 @@ afterEvaluate {
 
                 groupId = 'com.github.mostafahashim'
                 artifactId = 'gallery-lib'
-                version = '1.2.1'
+                version = '1.2.2'
             }
         }
     }

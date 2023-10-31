@@ -37,7 +37,11 @@ class GalleryLib(var myActivity: AppCompatActivity) {
             bottomSheetFragment.arguments = bundle
             bottomSheetFragment.onResultCallback = object : OnResultCallback {
                 override fun onResult(list: ArrayList<GalleryModel>) {
-                    onResultCallback?.onResult(list)
+                    onResultCallback.onResult(list)
+                }
+
+                override fun onDismiss() {
+                    onResultCallback.onDismiss()
                 }
             }
             bottomSheetFragment.show(myActivity.supportFragmentManager, bottomSheetFragment.tag)

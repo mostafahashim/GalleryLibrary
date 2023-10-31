@@ -20,7 +20,7 @@ android library for gallery images and videos, and capture camera image and vide
 
 ```groovy
 
-    implementation 'com.github.mostafahashim:GalleryLibrary:1.2.1'
+    implementation 'com.github.mostafahashim:GalleryLibrary:1.2.2'
 
 ```
 # Usage
@@ -48,6 +48,9 @@ fun openGallery() {
                 binding.viewModel?.recyclerGalleryAdapter?.setList(
                     binding.viewModel?.galleryModels ?: ArrayList()
                 )
+            }
+            override fun onDismiss() {
+
             }
         },
         galleryResultLauncher = galleryResultLauncher

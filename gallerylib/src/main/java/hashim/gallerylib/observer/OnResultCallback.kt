@@ -4,4 +4,5 @@ import hashim.gallerylib.model.GalleryModel
 
 interface OnResultCallback {
     fun onResult(list: ArrayList<GalleryModel>)
+    fun onDismiss()
 }
