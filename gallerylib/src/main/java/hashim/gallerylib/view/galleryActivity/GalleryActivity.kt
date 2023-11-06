@@ -89,7 +89,7 @@ class GalleryActivity : GalleryBaseActivity(
         val bundle = Bundle()
 
         bundle.putSerializable(
-            "AlbumModels", binding.viewModel?.folderModels
+            "AlbumModels", binding.viewModel?.albumModels
         )
         bundle.putSerializable("title", getString(R.string.choose_album))
         bottomSheetFragment.arguments = bundle
@@ -97,10 +97,10 @@ class GalleryActivity : GalleryBaseActivity(
             OnBottomSheetItemClickListener {
             override fun onBottomSheetItemClickListener(position: Int) {
                 binding.viewModel?.selectedAlbumName?.value =
-                    binding.viewModel?.folderModels!![position]
+                    binding.viewModel?.albumModels!![position].name
                 binding.viewModel?.recyclerGalleryAdapter?.filter(
                     if (position == 0) ""
-                    else binding.viewModel?.folderModels!![position]
+                    else binding.viewModel?.albumModels!![position].name
                 )
                 binding.rcGallery.scrollToPosition(0)
             }
@@ -368,59 +368,6 @@ class GalleryActivity : GalleryBaseActivity(
                 }
             }
         }
-
-    /*  private var imageResultLauncher =
-          registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-              if (result.resultCode == Activity.RESULT_OK
-              ) {
-                  // Tell the media scanner about the new file so that it is
-                  // immediately available to the user
-
-                  val fileImage = result.data?.extras?.get("ImageFile") as File
-                  MediaScannerConnection.scanFile(
-                      this,
-                      arrayOf(fileImage.toString()), null
-                  ) { _, _ ->
-                      runOnUiThread {
-                          try {
-                              // prepare model to send it
-                              val customGalleryModel =
-                                  GalleryModel()
-                              customGalleryModel.index_when_selected = 1
-                              val itemUrI = DataProvider().getImageURI(
-                                  applicationContext, fileImage.path
-                              )
-                              val newUri = Uri.parse(itemUrI)
-                              val galleryModel =
-                                  binding.viewModel?.getLastCapturedGalleryImage(this, newUri)
-                              if (galleryModel != null) {
-                                  binding.viewModel?.selectedAlbumName?.value =
-                                      getString(R.string.all)
-                                  binding.viewModel?.recyclerGalleryAdapter?.filter("")
-                                  binding.rcGallery.scrollToPosition(0)
-                                  binding.viewModel?.recyclerGalleryAdapter?.deselectAll()
-                                  binding.viewModel?.recyclerGalleryAdapter?.addItemToTop(
-                                      galleryModel
-                                  )
-                                  binding.viewModel?.showHideButtonDone(true)
-                              } else {
-                                  Toast.makeText(
-                                      applicationContext,
-                                      R.string.error_while_capture_the_photo_or_video_empty_file,
-                                      Toast.LENGTH_LONG
-                                  ).show()
-                              }
-                          } catch (e: Exception) {
-                              Toast.makeText(
-                                  applicationContext,
-                                  R.string.error_while_capture_the_photo_or_video_empty_file,
-                                  Toast.LENGTH_LONG
-                              ).show()
-                          }
-                      }
-                  }
-              }
-          }*/
 
     private fun getIntentForSelectedItems(
         selected: ArrayList<GalleryModel>?

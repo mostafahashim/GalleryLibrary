@@ -11,17 +11,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hashim.gallerylib.R
 import hashim.gallerylib.adapter.RecyclerGalleryAdapter
+import hashim.gallerylib.model.AlbumModel
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnItemSelectedListener
 import hashim.gallerylib.util.GalleryConstants
-import hashim.gallerylib.util.ScreenSizeUtils
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 class GalleryViewModel : ViewModel() {
     lateinit var observer: Observer
     var selectedPhotos: ArrayList<GalleryModel> = ArrayList()
-    var folderModels: ArrayList<String> = ArrayList()
+    var albumModels: ArrayList<AlbumModel> = ArrayList()
     var showType = ""
     var maxSelectionCount = 10
     var selectedAlbumName = MutableLiveData("")
@@ -82,6 +82,18 @@ class GalleryViewModel : ViewModel() {
             btnCameraPhotoVisible.value = true
             btnCameraVideoVisible.value = true
         }
+    }
+
+
+    fun checkIfAlbumFound(albumName: String): Int {
+        if (albumModels.isEmpty())
+            return -1
+        for (i in albumModels.indices) {
+            if (albumModels[i].name.compareTo(albumName) == 0) {
+                return i
+            }
+        }
+        return -1
     }
 
     @SuppressLint("Range")
@@ -147,12 +159,29 @@ class GalleryViewModel : ViewModel() {
                         )
                     item.itemUrI = imageuri.toString()
                     item.type = GalleryConstants.GalleryTypeImages
+                    item.url = "file://" + item.sdcardPath
+                    item.isVideo = false
                     //get albumName
                     val albumNameColumnIndex = imagecursor
                         .getColumnIndex("bucket_display_name")
                     item.albumName = imagecursor.getString(albumNameColumnIndex)
-                    if (!folderModels.contains(item.albumName))
-                        folderModels.add(item.albumName)
+
+                    //add its album
+                    val albumPosition = checkIfAlbumFound(item.albumName)
+                    if (albumPosition == -1) {
+                        albumModels.add(
+                            AlbumModel(
+                                name = item.albumName,
+                                mainImage = item.url,
+                                imagesCount = 1
+                            )
+                        )
+                    } else {
+                        //increase images count
+                        albumModels[albumPosition].imagesCount =
+                            albumModels[albumPosition].imagesCount + 1
+                    }
+
                     galleryList.add(item)
                 }
                 imagecursor.close()
@@ -256,12 +285,27 @@ class GalleryViewModel : ViewModel() {
                         )
                     item.itemUrI = videoUri.toString()
                     item.type = GalleryConstants.GalleryTypeVideos
+                    item.url = Uri.fromFile(File(item.sdcardPath)).toString()
+                    item.isVideo = true
                     //get albumName
                     val albumNameColumnIndex = videoCursor
                         .getColumnIndex("bucket_display_name")
                     item.albumName = videoCursor.getString(albumNameColumnIndex)
-                    if (!folderModels.contains(item.albumName))
-                        folderModels.add(item.albumName)
+                    //add its album
+                    val albumPosition = checkIfAlbumFound(item.albumName)
+                    if (albumPosition == -1) {
+                        albumModels.add(
+                            AlbumModel(
+                                name = item.albumName,
+                                mainImage = item.url,
+                                imagesCount = 1
+                            )
+                        )
+                    } else {
+                        //increase images count
+                        albumModels[albumPosition].imagesCount =
+                            albumModels[albumPosition].imagesCount + 1
+                    }
                     galleryList.add(item)
                 }
                 videoCursor.close()
@@ -276,9 +320,9 @@ class GalleryViewModel : ViewModel() {
     fun getGalleryPhotosAndVideos(context: Context): ArrayList<GalleryModel> {
         var galleryList = ArrayList<GalleryModel>()
         try {
-            folderModels = ArrayList()
-            folderModels.add(context.getString(R.string.all))
-            selectedAlbumName.value = folderModels[0]
+            albumModels = ArrayList()
+            albumModels.add(AlbumModel(name = context.getString(R.string.all)))
+            selectedAlbumName.value = albumModels[0].name
             fromCameraContainer.value = true
             if (showType.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
                 galleryList.addAll(getGalleryPhotos(context))
@@ -302,12 +346,15 @@ class GalleryViewModel : ViewModel() {
         }
 
         // sort list by date modified
-        galleryList =
-            java.util.ArrayList<GalleryModel>(galleryList.sortedWith(compareBy { it.item_date_modified }))
+        galleryList = ArrayList(galleryList.sortedWith(compareBy { it.item_date_modified }))
 
 //        Collections.sort(galleryList, ComparableGalleryModel.instance.compareDateModified)
         // showType newest photo at beginning of the list
         galleryList.reverse()
+        if (albumModels.isNotEmpty() && galleryList.isNotEmpty()) {
+            albumModels[0].mainImage = galleryList[0].url
+            albumModels[0].imagesCount = galleryList.size
+        }
         // replace items that selected
         if (selectedPhotos.isNotEmpty()) {
             for (i in galleryList.indices) {
@@ -322,6 +369,7 @@ class GalleryViewModel : ViewModel() {
         }
         return galleryList
     }
+
 
     @SuppressLint("Range")
     fun getLastCapturedGalleryImage(context: Context, uri: Uri): GalleryModel? {
@@ -386,12 +434,27 @@ class GalleryViewModel : ViewModel() {
                     )
                 item.itemUrI = imageuri.toString()
                 item.type = GalleryConstants.GalleryTypeImages
+                item.url = "file://" + item.sdcardPath
+                item.isVideo = false
                 //get albumName
                 val albumNameColumnIndex = imagecursor
                     .getColumnIndex("bucket_display_name")
                 item.albumName = imagecursor.getString(albumNameColumnIndex)
-                if (!folderModels.contains(item.albumName))
-                    folderModels.add(item.albumName)
+                //add its album
+                val albumPosition = checkIfAlbumFound(item.albumName)
+                if (albumPosition == -1) {
+                    albumModels.add(
+                        AlbumModel(
+                            name = item.albumName,
+                            mainImage = item.url,
+                            imagesCount = 1
+                        )
+                    )
+                } else {
+                    //increase images count
+                    albumModels[albumPosition].imagesCount =
+                        albumModels[albumPosition].imagesCount + 1
+                }
                 imagecursor.close()
                 return item
             }
@@ -494,12 +557,27 @@ class GalleryViewModel : ViewModel() {
                     )
                 item.itemUrI = videoUri.toString()
                 item.type = GalleryConstants.GalleryTypeVideos
+                item.url = Uri.fromFile(File(item.sdcardPath)).toString()
+                item.isVideo = true
                 //get albumName
                 val albumNameColumnIndex = videoCursor
                     .getColumnIndex("bucket_display_name")
                 item.albumName = videoCursor.getString(albumNameColumnIndex)
-                if (!folderModels.contains(item.albumName))
-                    folderModels.add(item.albumName)
+                //add its album
+                val albumPosition = checkIfAlbumFound(item.albumName)
+                if (albumPosition == -1) {
+                    albumModels.add(
+                        AlbumModel(
+                            name = item.albumName,
+                            mainImage = item.url,
+                            imagesCount = 1
+                        )
+                    )
+                } else {
+                    //increase images count
+                    albumModels[albumPosition].imagesCount =
+                        albumModels[albumPosition].imagesCount + 1
+                }
                 videoCursor.close()
                 return item
             }

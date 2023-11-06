@@ -7,10 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import hashim.gallerylib.view.GalleryBaseActivity
 import hashim.gallerylib.R
 import hashim.gallerylib.databinding.RecyclerBottomSheetAlbumItemBinding
+import hashim.gallerylib.model.AlbumModel
 import hashim.gallerylib.observer.OnBottomSheetItemClickListener
 
 class RecyclerAlbumsBottomSheetAdapter(
-    val albumModels: ArrayList<String>,
+    var columnWidth: Double,
+    val albumModels: ArrayList<AlbumModel>,
     var onBottomSheetItemClickListener: OnBottomSheetItemClickListener
 ) : RecyclerView.Adapter<RecyclerAlbumsBottomSheetAdapter.ViewHolder>() {
     override fun onCreateViewHolder(
@@ -36,8 +38,10 @@ class RecyclerAlbumsBottomSheetAdapter(
         holder: ViewHolder,
         position: Int
     ) {
-        val item = albumModels[holder.layoutPosition]
+        albumModels[holder.layoutPosition].columnWidth = columnWidth
+        albumModels[holder.layoutPosition].columnHeight = columnWidth
 
+        val item = albumModels[holder.layoutPosition]
 
         holder.binding.model = item
         holder.itemView.setOnClickListener {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -7,30 +8,91 @@
 
         <variable
             name="model"
-            type="String" />
+            type="hashim.gallerylib.model.AlbumModel" />
     </data>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:orientation="vertical">
+    <androidx.cardview.widget.CardView
+        android:layout_width="@dimen/padding_115"
+        android:layout_height="@dimen/padding_115"
+        android:layout_margin="@dimen/padding_2"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="@dimen/padding_0"
+        app:cardElevation="@dimen/padding_1"
+        app:cardUseCompatPadding="false"
+        app:contentPadding="@dimen/padding_0"
+        app:layoutHeight="@{model.columnHeight}"
+        app:layoutWidth="@{model.columnWidth}">
 
-        <TextView
-            android:id="@+id/tv_bottom_sheet_item"
+        <RelativeLayout
+            android:id="@+id/gallery_item_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/layout_bg_transparent_gray_selector_with_bg_white"
             android:gravity="center"
-            android:padding="@dimen/padding_15"
-            android:text="@{model}"
-            android:textColor="@color/taupe"
-            android:textSize="@dimen/font_size_18" />
+            android:padding="@dimen/padding_0">
 
-        <View
-            android:id="@+id/line_bottom_sheet_item"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/padding_1"
-            android:background="@color/gainsboro" />
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/ivImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/app_name"
+                android:scaleType="centerCrop"
+                android:src="@drawable/round_5_bg_gray_light"
+                app:imageUrlRect="@{model.mainImage}" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/gradient_bg_black"
+                android:padding="@dimen/padding_4">
+
+                <TextView
+                    android:id="@+id/tv_bottom_sheet_itemCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:text="@{String.valueOf(model.imagesCount)}"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/font_size_12" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/padding_3"
+                    android:layout_marginEnd="@dimen/padding_15"
+                    android:layout_marginBottom="@dimen/padding_3"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/padding_12"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/app_name"
+                        android:src="@drawable/folder_icon" />
+
+                    <TextView
+                        android:id="@+id/tv_bottom_sheet_item"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="@dimen/padding_3"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@{model.name}"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_13" />
+                </LinearLayout>
+
+            </RelativeLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
 </layout>

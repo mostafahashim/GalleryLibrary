@@ -14,7 +14,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,8 +29,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.github.chrisbanes.photoview.PhotoView
-import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
-import com.google.android.material.bottomsheet.BottomSheetBehavior.SAVE_FIT_TO_CONTENTS
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -87,22 +84,6 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         return binding.root
     }
 
-    //    fun onViewReleased(releasedChild: View, xVel: Float, yVel: Float) {
-//        val top: Int
-//        @BottomSheetBehavior.State val targetState: Int
-//
-//        // Use the position where the drag ended as new top
-//        top = releasedChild.top
-//
-//        // You have to manage the states here, too (introduce a new one)
-//        targetState = STATE_ANCHORED
-//        if (mViewDragHelper.settleCapturedViewAt(releasedChild.left, top)) {
-//            setStateInternal(STATE_SETTLING)
-//            ViewCompat.postOnAnimation(releasedChild, SettleRunnable(releasedChild, targetState))
-//        } else {
-//            setStateInternal(targetState)
-//        }
-//    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.AppBottomSheetDialogTheme)
@@ -170,7 +151,6 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         val intent = Intent()
         intent.putExtra(GalleryConstants.selected, selected)
         onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
-//        setResult(AppCompatActivity.RESULT_OK, intent)
     }
 
     override fun openAlbums() {
@@ -178,7 +158,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         val bundle = Bundle()
 
         bundle.putSerializable(
-            "AlbumModels", binding.viewModel?.folderModels
+            "AlbumModels", binding.viewModel?.albumModels
         )
         bundle.putSerializable("title", getString(R.string.choose_album))
         bottomSheetFragment.arguments = bundle
@@ -186,10 +166,10 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             OnBottomSheetItemClickListener {
             override fun onBottomSheetItemClickListener(position: Int) {
                 binding.viewModel?.selectedAlbumName?.value =
-                    binding.viewModel?.folderModels!![position]
+                    binding.viewModel?.albumModels!![position].name
                 binding.viewModel?.recyclerGalleryAdapter?.filter(
                     if (position == 0) ""
-                    else binding.viewModel?.folderModels!![position]
+                    else binding.viewModel?.albumModels!![position].name
                 )
                 binding.rcGallery.scrollToPosition(0)
             }
@@ -401,10 +381,6 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
             imageResultLauncher.launch(takePictureIntent)
         }
-//        if (!checkPermissions())
-//            return
-//        val intent = Intent(activity, CameraActivity::class.java)
-//        imageResultLauncher.launch(intent)
     }
 
     private var imageResultLauncher =
@@ -516,58 +492,5 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             .show()
 
     }
-
-    /* private var imageResultLauncher =
-         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-             if (result.resultCode == Activity.RESULT_OK
-             ) {
-                 // Tell the media scanner about the new file so that it is
-                 // immediately available to the user
-
-                 val fileImage = result.data?.extras?.get("ImageFile") as File
-                 MediaScannerConnection.scanFile(
-                     activity,
-                     arrayOf(fileImage.toString()), null
-                 ) { _, _ ->
-                     activity.runOnUiThread {
-                         try {
-                             // prepare model to send it
-                             val customGalleryModel =
-                                 GalleryModel()
-                             customGalleryModel.index_when_selected = 1
-                             val itemUrI = DataProvider().getImageURI(
-                                 activity, fileImage.path
-                             )
-                             val newUri = Uri.parse(itemUrI)
-                             val galleryModel =
-                                 binding.viewModel?.getLastCapturedGalleryImage(activity, newUri)
-                             if (galleryModel != null) {
-                                 binding.viewModel?.selectedAlbumName?.value =
-                                     getString(R.string.all)
-                                 binding.viewModel?.recyclerGalleryAdapter?.filter("")
-                                 binding.rcGallery.scrollToPosition(0)
-                                 binding.viewModel?.recyclerGalleryAdapter?.deselectAll()
-                                 binding.viewModel?.recyclerGalleryAdapter?.addItemToTop(
-                                     galleryModel
-                                 )
-                                 binding.viewModel?.showHideButtonDone(true)
-                             } else {
-                                 Toast.makeText(
-                                     activity,
-                                     R.string.error_while_capture_the_photo_or_video_empty_file,
-                                     Toast.LENGTH_LONG
-                                 ).show()
-                             }
-                         } catch (e: Exception) {
-                             Toast.makeText(
-                                 activity,
-                                 R.string.error_while_capture_the_photo_or_video_empty_file,
-                                 Toast.LENGTH_LONG
-                             ).show()
-                         }
-                     }
-                 }
-             }
-         }*/
 
 }

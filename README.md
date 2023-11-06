@@ -20,7 +20,7 @@ android library for gallery images and videos, and capture camera image and vide
 
 ```groovy
 
-    implementation 'com.github.mostafahashim:GalleryLibrary:1.2.2'
+    implementation 'com.github.mostafahashim:GalleryLibrary:1.2.3'
 
 ```
 # Usage
