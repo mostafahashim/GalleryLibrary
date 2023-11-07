@@ -18,4 +18,14 @@
     <string name="settings">الإعدادت</string>
     <string name="you_may_not_select_more_than_s_item">لايمكن اختيار اكثر من %s عنصر</string>
     <string name="please_wait">من فضلك انتظر...</string>
+    <string name="free">Free</string>
+    <string name="_1_1">1:1</string>
+    <string name="_3_4">3:4</string>
+    <string name="_2_1">2:1</string>
+    <string name="_16_9">16:9</string>
+    <string name="_1_2">1:2</string>
+    <string name="_4_3">4:3</string>
+    <string name="_9_16">9:16</string>
+    <string name="_3_2">3:2</string>
+    <string name="_2_3">2:3</string>
 </resources>

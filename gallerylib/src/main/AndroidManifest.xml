@@ -57,6 +57,22 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name="hashim.gallerylib.view.selected.SelectedActivity"
+            android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
+            android:hardwareAccelerated="true"
+            android:resizeableActivity="true"
+            android:theme="@style/AppTheme.NoActionBar.LightScreen"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="hashim.gallerylib.view.crop.CropActivity"
+            android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
+            android:hardwareAccelerated="true"
+            android:resizeableActivity="true"
+            android:theme="@style/AppTheme.NoActionBar.LightScreen"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name="hashim.gallerylib.view.cameraActivity.CameraActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"

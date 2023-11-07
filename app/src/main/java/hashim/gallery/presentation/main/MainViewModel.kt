@@ -11,6 +11,7 @@ class MainViewModel : ViewModel() {
 
     var recyclerGalleryAdapter: RecyclerGalleryAdapter
     var isDialog = MutableLiveData(true)
+    var isOpenEdit = MutableLiveData(true)
     var isRTL = MutableLiveData(true)
     var isShowImages = MutableLiveData(true)
     var isShowVideos = MutableLiveData(true)

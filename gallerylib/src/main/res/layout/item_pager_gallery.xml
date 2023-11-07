@@ -31,7 +31,6 @@
             android:adjustViewBounds="true"
             android:background="@color/black"
             android:contentDescription="@string/app_name"
-            android:scaleType="centerCrop"
             android:src="@drawable/round_5_bg_gray_light"
             app:imageUrlRect="@{model.url}" />
 
@@ -56,7 +55,7 @@
             android:gravity="center"
             android:padding="@dimen/padding_4"
             android:src="@{model.selected?@drawable/done_white_icon:@drawable/transparent}"
-            android:visibility="@{showCounter?View.GONE:View.VISIBLE}"
+            android:visibility="gone"
             app:tint="@color/white" />
 
         <TextView
@@ -73,7 +72,7 @@
             android:text="@{String.valueOf(model.index_when_selected)}"
             android:textColor="@{model.selected?@color/white:@color/transparent}"
             android:textSize="@dimen/font_size_12"
-            android:visibility="@{showCounter?View.VISIBLE:View.GONE}" />
+            android:visibility="gone" />
     </RelativeLayout>
 
 </layout>

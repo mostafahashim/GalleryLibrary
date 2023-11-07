@@ -8,19 +8,19 @@ android library for gallery images and videos, and capture camera image and vide
 ## Add it in your root build.gradle at the end of repositories or settings.gradle:
  ```groovy
   dependencyResolutionManagement {
-        repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-            repositories {
-                mavenCentral()
-                maven { url 'https://jitpack.io' }
-            }
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
+}
 ```
 
 #Step 2. Add the dependency
 
 ```groovy
 
-    implementation 'com.github.mostafahashim:GalleryLibrary:1.2.3'
+    implementation 'com.github.mostafahashim:GalleryLibrary:1.2.4'
 
 ```
 # Usage
@@ -31,6 +31,7 @@ fun openGallery() {
 
     GalleryLib(this).showGallery(
         isDialog = binding.viewModel?.isDialog?.value ?: false,
+        isOpenEdit = binding.viewModel?.isOpenEdit?.value ?: false,
         selectionType = if (binding.viewModel?.isShowImages?.value!! && binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeImagesAndVideos
         else if (binding.viewModel?.isShowImages?.value!!) GalleryConstants.GalleryTypeImages
         else if (binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeVideos

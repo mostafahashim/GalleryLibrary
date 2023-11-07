@@ -17,6 +17,7 @@ data class GalleryModel(
     var isSelected: Boolean = false,
     var type: String = "",
     var isVideo: Boolean = false,
+    var isReleasePlayer: Boolean = false,
     var albumName: String = "",
     var index_when_selected: Int = 0,
     var item_date_modified: Int = 0,

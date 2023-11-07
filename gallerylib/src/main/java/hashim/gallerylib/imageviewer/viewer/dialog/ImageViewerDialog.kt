@@ -2,7 +2,9 @@ package hashim.gallerylib.imageviewer.viewer.dialog
 
 import android.content.Context
 import android.view.KeyEvent
+import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AlertDialog
 import hashim.gallerylib.R
 import hashim.gallerylib.imageviewer.viewer.builder.BuilderData
@@ -31,6 +33,10 @@ internal class ImageViewerDialog<T>(
             .setOnKeyListener { _, keyCode, event -> onDialogKeyEvent(keyCode, event) }
             .create()
             .apply {
+                window!!.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 setOnShowListener { viewerView.open(builderData.transitionView, animateOpen) }
                 setOnDismissListener { builderData.onDismissListener?.onDismiss() }
             }
@@ -82,6 +88,10 @@ internal class ImageViewerDialog<T>(
 
     private fun setupViewerView() {
         viewerView.apply {
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
             isZoomingAllowed = builderData.isZoomingAllowed
             isSwipeToDismissAllowed = builderData.isSwipeToDismissAllowed
 
@@ -91,8 +101,10 @@ internal class ImageViewerDialog<T>(
 
             setBackgroundColor(builderData.backgroundColor)
 //            setImages(builderData.images, builderData.startPosition, builderData.imageLoader)
-            setImages(builderData.images, builderData.startPosition, builderData.imageLoader,
-                builderData.viewHolderLoader)
+            setImages(
+                builderData.images, builderData.startPosition, builderData.imageLoader,
+                builderData.viewHolderLoader
+            )
 
             onPageChange = { position -> builderData.imageChangeListener?.onImageChange(position) }
             onDismiss = { dialog.dismiss() }

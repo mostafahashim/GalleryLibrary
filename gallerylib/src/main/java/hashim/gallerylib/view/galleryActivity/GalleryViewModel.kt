@@ -24,6 +24,7 @@ class GalleryViewModel : ViewModel() {
     var albumModels: ArrayList<AlbumModel> = ArrayList()
     var showType = ""
     var maxSelectionCount = 10
+    var isOpenEdit = false
     var selectedAlbumName = MutableLiveData("")
     var btnDoneVisible = MutableLiveData(false)
     var fromCameraContainer = MutableLiveData(false)

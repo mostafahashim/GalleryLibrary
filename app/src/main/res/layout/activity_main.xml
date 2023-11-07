@@ -18,13 +18,28 @@
         android:orientation="vertical"
         android:padding="@dimen/padding_16">
 
-        <CheckBox
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_10"
-            android:checked="@={viewModel.isDialog}"
-            android:text="@string/is_dialog"
-            android:textColor="@color/black" />
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@={viewModel.isDialog}"
+                android:text="@string/is_dialog"
+                android:textColor="@color/black" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/padding_40"
+                android:checked="@={viewModel.isOpenEdit}"
+                android:text="@string/edit_after_select"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

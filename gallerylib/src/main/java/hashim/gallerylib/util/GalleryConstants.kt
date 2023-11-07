@@ -11,6 +11,7 @@ object GalleryConstants {
 
     const val Language = "localeLanguage"
     const val selected = "selected"
+    const val isOpenEdit = "isOpenEdit"
     const val maxSelectionCount = "MaxPhotosNumber"
     const val gridColumnsCount = "GridColumnsCount"
     const val showType = "showType"

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="hashim.gallerylib.view.selected.SelectedViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/padding_55"
+            android:background="@color/white"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/imgviewBack"
+                android:layout_width="@dimen/padding_40"
+                android:layout_height="@dimen/padding_40"
+                android:layout_centerVertical="true"
+                android:adjustViewBounds="true"
+                android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
+                android:contentDescription="@string/app_name"
+                android:onClick="@{()->viewModel.observer.onBackClicked()}"
+                android:padding="@dimen/padding_12"
+                android:src="@drawable/back_white_icon"
+                app:tint="@color/black" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/imgviewCrop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
+                    android:contentDescription="@string/app_name"
+                    android:onClick="@{()->viewModel.observer.cropImage()}"
+                    android:padding="@dimen/padding_12"
+                    android:src="@drawable/crop_icon"
+                    app:tint="@color/black" />
+
+                <ImageView
+                    android:id="@+id/btnGalleryOk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="@dimen/padding_20"
+                    android:background="@drawable/circle_bg_transparent_strok_white_with_transparent_gray_selector"
+                    android:contentDescription="@string/app_name"
+                    android:onClick="@{()->viewModel.observer.finishWithSuccess()}"
+                    android:padding="@dimen/padding_12"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/done_white_icon"
+                    app:tint="@color/black" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager_ActivityLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black" />
+
+    </LinearLayout>
+</layout>

@@ -48,6 +48,7 @@ import hashim.gallerylib.observer.OnResultCallback
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
+import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
 import java.util.Collections
 
@@ -103,6 +104,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             requireArguments().getInt(GalleryConstants.maxSelectionCount, 50)
         binding.viewModel?.columnsNumber?.value =
             requireArguments().getInt(GalleryConstants.gridColumnsCount, 3)
+        binding.viewModel?.isOpenEdit =
+            requireArguments().getBoolean(GalleryConstants.isOpenEdit, false)
         binding.viewModel?.showType = requireArguments().getString(
             GalleryConstants.showType,
             GalleryConstants.GalleryTypeImages
@@ -127,30 +130,39 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
     override fun openFinish() {
         binding.viewModel?.selectedPhotos =
             binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
-        getIntentForSelectedItems(binding.viewModel?.selectedPhotos)
-        dismissAllowingStateLoss()
-    }
-
-    override fun onBackClicked() {
-        binding.viewModel?.selectedPhotos =
-            binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
-//        onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
-        dismissAllowingStateLoss()
-    }
-
-    private fun getIntentForSelectedItems(
-        selected: ArrayList<GalleryModel>?
-    ) {
         // sort list as selected index
-        if (selected != null) {
+        if (binding.viewModel?.selectedPhotos != null) {
             Collections.sort(
-                selected,
+                binding.viewModel?.selectedPhotos!!,
                 ComparableGalleryModel.instance.compareIndex_when_selected
             )
         }
-        val intent = Intent()
-        intent.putExtra(GalleryConstants.selected, selected)
-        onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+        if (binding.viewModel?.isOpenEdit == true) {
+            Intent(activity, SelectedActivity::class.java).also {
+                it.putExtra(GalleryConstants.selected, binding.viewModel?.selectedPhotos)
+                val locale = requireArguments().getString(GalleryConstants.Language) ?: GalleryConstants.ENGLISH
+                it.putExtra(GalleryConstants.Language, locale)
+                cropResultLauncher.launch(it)
+            }
+
+        } else {
+            onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+            dismissAllowingStateLoss()
+        }
+    }
+
+    private var cropResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                binding.viewModel?.selectedPhotos =
+                    result.data?.extras?.get(GalleryConstants.selected) as ArrayList<GalleryModel>
+                onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+                dismissAllowingStateLoss()
+            }
+        }
+
+    override fun onBackClicked() {
+        dismissAllowingStateLoss()
     }
 
     override fun openAlbums() {

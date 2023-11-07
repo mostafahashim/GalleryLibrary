@@ -37,6 +37,7 @@ import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
 import hashim.gallerylib.view.GalleryBaseActivity
+import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
 import java.util.*
 
@@ -65,6 +66,8 @@ class GalleryActivity : GalleryBaseActivity(
             intent.getIntExtra(GalleryConstants.maxSelectionCount, 50)
         binding.viewModel?.columnsNumber?.value =
             intent.getIntExtra(GalleryConstants.gridColumnsCount, 3)
+        binding.viewModel?.isOpenEdit =
+            intent.getBooleanExtra(GalleryConstants.isOpenEdit, false)
         binding.viewModel?.showType =
             intent.getStringExtra(GalleryConstants.showType) ?: GalleryConstants.GalleryTypeImages
 
@@ -77,11 +80,58 @@ class GalleryActivity : GalleryBaseActivity(
 
     }
 
+    override fun onBackClicked() {
+        finish_activity()
+    }
+
+    @Suppress("DEPRECATION")
+    @Deprecated("")
+    override fun onBackPressed() {
+        finish_activity()
+        super.onBackPressed()
+    }
+
     override fun openFinish() {
         binding.viewModel?.selectedPhotos =
             binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
-        getIntentForSelectedItems(binding.viewModel?.selectedPhotos)
-        finish_activity()
+        // sort list as selected index
+        if (binding.viewModel?.selectedPhotos != null) {
+            Collections.sort(
+                binding.viewModel?.selectedPhotos!!,
+                ComparableGalleryModel.instance.compareIndex_when_selected
+            )
+        }
+        if (binding.viewModel?.isOpenEdit == true) {
+            Intent(this@GalleryActivity, SelectedActivity::class.java).also {
+                it.putExtra(GalleryConstants.selected, binding.viewModel?.selectedPhotos)
+                var locale = "en"
+                if (intent.hasExtra(GalleryConstants.Language))
+                    locale =
+                        intent.getStringExtra(GalleryConstants.Language) ?: GalleryConstants.ENGLISH
+                it.putExtra(GalleryConstants.Language, locale)
+                cropResultLauncher.launch(it)
+            }
+
+        } else {
+            getIntentForSelectedItems()
+            finish_activity()
+        }
+    }
+
+    private var cropResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                binding.viewModel?.selectedPhotos =
+                    result.data?.extras?.get(GalleryConstants.selected) as ArrayList<GalleryModel>
+                getIntentForSelectedItems()
+                finish_activity()
+            }
+        }
+
+    private fun getIntentForSelectedItems() {
+        val intent = Intent()
+        intent.putExtra(GalleryConstants.selected, binding.viewModel?.selectedPhotos)
+        setResult(RESULT_OK, intent)
     }
 
     override fun openAlbums() {
@@ -107,13 +157,6 @@ class GalleryActivity : GalleryBaseActivity(
         })
         bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
     }
-
-    override fun onBackClicked() {
-        binding.viewModel?.selectedPhotos =
-            binding.viewModel?.recyclerGalleryAdapter?.getSelected() ?: ArrayList()
-        finish_activity()
-    }
-
 
     private fun fetchData() {
         if (checkPermissions())
@@ -368,26 +411,6 @@ class GalleryActivity : GalleryBaseActivity(
                 }
             }
         }
-
-    private fun getIntentForSelectedItems(
-        selected: ArrayList<GalleryModel>?
-    ) {
-        // sort list as selected index
-        if (selected != null) {
-            Collections.sort(
-                selected,
-                ComparableGalleryModel.instance.compareIndex_when_selected
-            )
-        }
-        val intent = Intent()
-        intent.putExtra(GalleryConstants.selected, selected)
-        setResult(RESULT_OK, intent)
-    }
-
-    override fun onBackPressed() {
-        finish_activity()
-        super.onBackPressed()
-    }
 
     private var viewer: ImageViewer<GalleryModel>? = null
     override fun openImageViewer(

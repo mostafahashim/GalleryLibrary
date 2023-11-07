@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity(), MainViewModel.Observer {
 
         GalleryLib(this).showGallery(
             isDialog = binding.viewModel?.isDialog?.value ?: false,
+            isOpenEdit = binding.viewModel?.isOpenEdit?.value ?: false,
             selectionType = if (binding.viewModel?.isShowImages?.value!! && binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeImagesAndVideos
             else if (binding.viewModel?.isShowImages?.value!!) GalleryConstants.GalleryTypeImages
             else if (binding.viewModel?.isShowVideos?.value!!) GalleryConstants.GalleryTypeVideos

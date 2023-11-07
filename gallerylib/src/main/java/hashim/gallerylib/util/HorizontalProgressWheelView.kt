@@ -1,0 +1,163 @@
+package hashim.gallerylib.util
+
+import android.annotation.TargetApi
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.os.Build
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import android.widget.SeekBar
+import androidx.annotation.ColorInt
+import androidx.appcompat.widget.AppCompatSeekBar
+import androidx.core.content.ContextCompat
+import hashim.gallerylib.R
+
+
+class HorizontalProgressWheelView : View {
+
+    private val mCanvasClipBounds = Rect()
+
+    private var mScrollingListener: ScrollingListener? = null
+    private var mLastTouchedPosition = 0f
+
+    private var mProgressLinePaint: Paint? = null
+    private var mProgressMiddleLinePaint: Paint? = null
+    private var mProgressLineWidth = 0
+    private var mProgressLineHeight: Int = 0
+    private var mProgressLineMargin = 0
+
+    private var mScrollStarted = false
+    private var mTotalScrollDistance = 0f
+
+    private var mMiddleLineColor = 0
+
+    constructor(context: Context) : super(context) {
+        init()
+    }
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init()
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
+        init()
+    }
+
+    constructor(
+        context: Context,
+        attrs: AttributeSet,
+        defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(context, attrs, defStyleAttr) {
+        init()
+    }
+
+    fun setScrollingListener(scrollingListener: ScrollingListener?) {
+        mScrollingListener = scrollingListener
+    }
+
+    fun setMiddleLineColor(@ColorInt middleLineColor: Int) {
+        mMiddleLineColor = middleLineColor
+        mProgressMiddleLinePaint!!.color = mMiddleLineColor
+        invalidate()
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> mLastTouchedPosition = event.x
+            MotionEvent.ACTION_UP -> if (mScrollingListener != null) {
+                mScrollStarted = false
+                mScrollingListener!!.onScrollEnd()
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val distance = event.x - mLastTouchedPosition
+                if (distance != 0f) {
+                    if (!mScrollStarted) {
+                        mScrollStarted = true
+                        if (mScrollingListener != null) {
+                            mScrollingListener!!.onScrollStart()
+                        }
+                    }
+                    onScrollEvent(event, distance)
+                }
+            }
+        }
+        return true
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.getClipBounds(mCanvasClipBounds)
+        val linesCount = mCanvasClipBounds.width() / (mProgressLineWidth + mProgressLineMargin)
+        val deltaX = mTotalScrollDistance % (mProgressLineMargin + mProgressLineWidth).toFloat()
+        for (i in 0 until linesCount) {
+            if (i < linesCount / 4) {
+                mProgressLinePaint!!.alpha = (255 * (i / (linesCount / 4).toFloat())).toInt()
+            } else if (i > linesCount * 3 / 4) {
+                mProgressLinePaint!!.alpha =
+                    (255 * ((linesCount - i) / (linesCount / 4).toFloat())).toInt()
+            } else {
+                mProgressLinePaint!!.alpha = 255
+            }
+            canvas.drawLine(
+                -deltaX + mCanvasClipBounds.left + i * (mProgressLineWidth + mProgressLineMargin),
+                mCanvasClipBounds.centerY() - mProgressLineHeight / 4.0f,
+                -deltaX + mCanvasClipBounds.left + i * (mProgressLineWidth + mProgressLineMargin),
+                mCanvasClipBounds.centerY() + mProgressLineHeight / 4.0f, mProgressLinePaint!!
+            )
+        }
+        canvas.drawLine(
+            mCanvasClipBounds.centerX().toFloat(),
+            mCanvasClipBounds.centerY() - mProgressLineHeight / 2.0f,
+            mCanvasClipBounds.centerX().toFloat(),
+            mCanvasClipBounds.centerY() + mProgressLineHeight / 2.0f,
+            mProgressMiddleLinePaint!!
+        )
+    }
+
+    private fun onScrollEvent(event: MotionEvent, distance: Float) {
+        mTotalScrollDistance -= distance
+        postInvalidate()
+        mLastTouchedPosition = event.x
+        if (mScrollingListener != null) {
+            mScrollingListener!!.onScroll(-distance, mTotalScrollDistance)
+        }
+    }
+
+    private fun init() {
+        mMiddleLineColor =
+            ContextCompat.getColor(context, R.color.colorPrimaryDark)
+        mProgressLineWidth =
+            context.resources.getDimensionPixelSize(R.dimen.padding_2)
+        mProgressLineHeight =
+            context.resources.getDimensionPixelSize(R.dimen.padding_20)
+        mProgressLineMargin =
+            context.resources.getDimensionPixelSize(R.dimen.padding_10)
+        mProgressLinePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        mProgressLinePaint!!.style = Paint.Style.STROKE
+        mProgressLinePaint!!.strokeWidth = mProgressLineWidth.toFloat()
+        mProgressLinePaint!!.color = ContextCompat.getColor(context, R.color.gray_dark)
+        mProgressMiddleLinePaint = Paint(mProgressLinePaint)
+        mProgressMiddleLinePaint!!.color = mMiddleLineColor
+        mProgressMiddleLinePaint!!.strokeCap = Paint.Cap.ROUND
+        mProgressMiddleLinePaint!!.strokeWidth =
+            context.resources.getDimensionPixelSize(R.dimen.padding_4)
+                .toFloat()
+
+    }
+
+    interface ScrollingListener {
+        fun onScrollStart()
+        fun onScroll(delta: Float, totalDistance: Float)
+        fun onScrollEnd()
+    }
+
+}

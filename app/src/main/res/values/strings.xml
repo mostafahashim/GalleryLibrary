@@ -8,4 +8,5 @@
     <string name="rtl_direction">RTL Direction</string>
     <string name="ltr_direction">LTR Direction</string>
     <string name="grid_columns">Grid Columns</string>
+    <string name="edit_after_select">Edit after select</string>
 </resources>
