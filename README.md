@@ -1,6 +1,6 @@
 # GalleryLibrary
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/features.png"/>
 
-android library for gallery images and videos, and capture camera image and video
 
 [![](https://jitpack.io/v/mostafahashim/GalleryLibrary.svg)](https://jitpack.io/#mostafahashim/GalleryLibrary)
 
