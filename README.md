@@ -4,6 +4,11 @@ android library for gallery images and videos, and capture camera image and vide
 
 [![](https://jitpack.io/v/mostafahashim/GalleryLibrary.svg)](https://jitpack.io/#mostafahashim/GalleryLibrary)
 
+# Demo
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.mp4"/>
+
+
+### Setup
 ## Step 1. Add the JitPack repository to your build file
 ## Add it in your root build.gradle at the end of repositories or settings.gradle:
  ```groovy
