@@ -7,17 +7,19 @@ android library for gallery images and videos, and capture camera image and vide
 # Demo
 
 <p align="left">
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.gif" width="150" height="300"/>
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_2.gif" width="150" height="300"/>
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_3.gif" width="150" height="300"/>
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_4.gif"width="150" height="300"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.gif" width="300" height="600"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_2.gif" width="300" height="600"/>
+</p>
+<p align="left">
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_3.gif" width="300" height="600"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_4.gif" width="300" height="600"/>
 </p>
 
-### Setup
+# Setup
 
-## Step 1. Add the JitPack repository to your build file
+### Step 1. Add the JitPack repository to your build file
 
-## Add it in your root build.gradle at the end of repositories or settings.gradle:
+### Add it in your root build.gradle at the end of repositories or settings.gradle:
 
  ```groovy
   dependencyResolutionManagement {
