@@ -6,11 +6,11 @@ android library for gallery images and videos, and capture camera image and vide
 
 # Demo
 
-<p align="center">
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.gif"/>
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_2.gif"/>
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_3.gif"/>
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_4.gif"/>
+<p align="left">
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.gif" width="100" height="200"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_2.gif" width="100" height="200"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_3.gif" width="100" height="200"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_4.gif"width="100" height="200"/>
 </p>
 
 ### Setup
