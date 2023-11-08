@@ -5,7 +5,10 @@ android library for gallery images and videos, and capture camera image and vide
 [![](https://jitpack.io/v/mostafahashim/GalleryLibrary.svg)](https://jitpack.io/#mostafahashim/GalleryLibrary)
 
 # Demo
-<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.mp4"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_1.gif"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_2.gif"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_3.gif"/>
+<img src="https://github.com/mostafahashim/GalleryLibrary/blob/main/tutorial/video_4.gif"/>
 
 
 ### Setup
