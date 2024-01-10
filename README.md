@@ -36,7 +36,7 @@
 
 ```groovy
 
-implementation 'com.github.mostafahashim:GalleryLibrary:1.2.5'
+implementation 'com.github.mostafahashim:GalleryLibrary:{current_version}'
 
 ```
 
