@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -59,7 +60,7 @@ dependencies {
     implementation("com.github.bumptech.glide:okhttp3-integration:4.13.0@aar")
     implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation("com.github.2coffees1team:GlideToVectorYou:v2.0.0")
-    kapt ("com.github.bumptech.glide:compiler:4.13.0")
+    ksp ("com.github.bumptech.glide:ksp:4.15.1")
 
     implementation(project(":gallerylib"))
 //    implementation ("com.github.mostafahashim:GalleryLibrary:1.1.6")
