@@ -5,9 +5,9 @@
     <dist:module dist:instant="true" />
 
     <!--    Without this folders will be inaccessible in Android-11 and above devices-->
-<!--    <uses-permission-->
-<!--        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"-->
-<!--        tools:ignore="ScopedStorage" />-->
+    <!--    <uses-permission-->
+    <!--        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"-->
+    <!--        tools:ignore="ScopedStorage" />-->
 
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
@@ -84,10 +84,12 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_path" />
+                android:resource="@xml/file_path"
+                tools:replace="android:resource" />
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_icon"
                 android:resource="@drawable/camera_menu_icn" />
