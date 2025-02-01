@@ -29,7 +29,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.github.chrisbanes.photoview.PhotoView
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import hashim.gallerylib.R
@@ -48,6 +47,7 @@ import hashim.gallerylib.observer.OnResultCallback
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
+import hashim.gallerylib.util.serializable
 import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
 import java.util.Collections
@@ -94,12 +94,9 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        (dialog as? BottomSheetDialog)?.behavior?.state = BottomSheetBehavior.STATE_HIDDEN
-        val bottomSheetBehavior = (dialog as? BottomSheetDialog)?.behavior
-
-
         binding.viewModel?.selectedPhotos =
-            requireArguments()[GalleryConstants.selected] as ArrayList<GalleryModel>
+            arguments?.serializable<ArrayList<GalleryModel>>(GalleryConstants.selected)
+                ?: ArrayList()
         binding.viewModel?.maxSelectionCount =
             requireArguments().getInt(GalleryConstants.maxSelectionCount, 50)
         binding.viewModel?.columnsNumber?.value =
@@ -112,7 +109,6 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         )
 
         binding.viewModel?.initGalleryAdapter(ScreenSizeUtils().getScreenWidth(activity))
-//        binding.viewModel?.updateBooksAdapterColumnWidth(ScreenSizeUtils().getScreenWidth(this))
         binding.viewModel?.initializeCameraButtons()
         fetchData()
 
@@ -140,13 +136,15 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         if (binding.viewModel?.isOpenEdit == true) {
             Intent(activity, SelectedActivity::class.java).also {
                 it.putExtra(GalleryConstants.selected, binding.viewModel?.selectedPhotos)
-                val locale = requireArguments().getString(GalleryConstants.Language) ?: GalleryConstants.ENGLISH
+                val locale = requireArguments().getString(GalleryConstants.Language)
+                    ?: GalleryConstants.ENGLISH
                 it.putExtra(GalleryConstants.Language, locale)
                 cropResultLauncher.launch(it)
             }
 
         } else {
-            onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+            if (::onResultCallback.isInitialized)
+                onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
             dismissAllowingStateLoss()
         }
     }
@@ -155,8 +153,12 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 binding.viewModel?.selectedPhotos =
-                    result.data?.extras?.get(GalleryConstants.selected) as ArrayList<GalleryModel>
-                onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
+                    result.data?.extras?.serializable<java.util.ArrayList<GalleryModel>>(
+                        GalleryConstants.selected
+                    )
+                        ?: ArrayList()
+                if (::onResultCallback.isInitialized)
+                    onResultCallback.onResult(binding.viewModel?.selectedPhotos!!)
                 dismissAllowingStateLoss()
             }
         }
@@ -166,6 +168,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
     }
 
     override fun openAlbums() {
+        if (!isAdded || activity.isFinishing || isStateSaved)
+            return
         val bottomSheetFragment = BottomSheetAlbumsFragment()
         val bundle = Bundle()
 
@@ -200,9 +204,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             }
     }
 
-
-    var PERMISSIONS = ArrayList<String>()
-    fun hasPermissions(context: Context?, permissions: Array<String>): Boolean {
+    private var permissions = ArrayList<String>()
+    private fun hasPermissions(context: Context?, permissions: Array<String>): Boolean {
         if (context != null) {
             for (p in permissions) {
                 if (ActivityCompat.checkSelfPermission(
@@ -217,27 +220,27 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         return true
     }
 
-    fun checkPermissions(): Boolean {
-        PERMISSIONS = ArrayList()
-        PERMISSIONS.add(Manifest.permission.CAMERA)
-        PERMISSIONS.add(Manifest.permission.RECORD_AUDIO)
+    private fun checkPermissions(): Boolean {
+        permissions = ArrayList()
+        permissions.add(Manifest.permission.CAMERA)
+        permissions.add(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
-            PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES)
-            PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO)
-            PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO)
+            permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+            permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
+            permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
         } else {
-            PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         if (Build.VERSION.SDK_INT >= 23 && !hasPermissions(
                 activity,
-                PERMISSIONS.toTypedArray()
+                permissions.toTypedArray()
             )
         ) {
             requestPermissions(
-                PERMISSIONS.toTypedArray(),
+                permissions.toTypedArray(),
                 GalleryConstants.REQUEST_Permission_Gallery
             )
             return false
@@ -259,7 +262,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
                 } else {
                     MaterialAlertDialogBuilder(activity)
                         .setMessage(getString(R.string.you_should_allow_all_permissions_to_fetch_gallery_images))
-                        .setPositiveButton(getString(R.string.settings)) { dialog, which ->
+                        .setPositiveButton(getString(R.string.settings)) { _, _ ->
                             // Respond to positive button press
                             val intent = Intent()
                             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -271,7 +274,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             startActivity(intent)
                         }
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                        .setNegativeButton(getString(R.string.cancel)) { _, _ ->
                             // Respond to positive button press
                         }
                         .show()

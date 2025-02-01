@@ -15,6 +15,11 @@ import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ProgressLoading
 import hashim.gallerylib.view.GalleryBaseActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class CameraActivity : GalleryBaseActivity(
     R.string.gallery, false, false, true, false,
@@ -117,8 +122,20 @@ class CameraActivity : GalleryBaseActivity(
         super.onResume()
     }
 
-    override fun saveImage(): String {
-        return DataProvider().saveImage(binding.viewModel?.capturedBitmap?.value!!, this)
+    override fun saveImage() {
+        CoroutineScope(Dispatchers.IO).launch {
+            DataProvider().saveImage(
+                binding.viewModel?.capturedBitmap?.value!!,
+                this@CameraActivity
+            )
+                .collect { result ->
+                    withContext(Dispatchers.Main) {
+                        binding.viewModel?.savedFile = File(result)
+                        showLoader(false)
+                        finishWithSuccess()
+                    }
+                }
+        }
     }
 
 }

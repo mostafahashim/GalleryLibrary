@@ -17,6 +17,10 @@ import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.HorizontalProgressWheelView
 import hashim.gallerylib.view.GalleryBaseActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class CropActivity :
@@ -62,32 +66,40 @@ class CropActivity :
 //                binding.cropImageView.setImageUriAsync(result.uriContent)
                 if (imageBitmap == null)
                     return@setOnCropImageCompleteListener
-                val path = DataProvider().saveImage(imageBitmap, this)
-                val file = File(path)
-                MediaScannerConnection.scanFile(
-                    this,
-                    arrayOf(file.toString()), null
-                ) { _, uri ->
-                    runOnUiThread {
-                        val newUri = uri
-                            ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                FileProvider.getUriForFile(
-                                    this,
-                                    applicationContext.packageName + ".provider",
-                                    file
-                                )
-                            } else {
-                                Uri.fromFile(file)
+                CoroutineScope(Dispatchers.IO).launch {
+                    DataProvider().saveImage(imageBitmap, this@CropActivity).collect { result ->
+                        withContext(Dispatchers.Main) {
+                            val file = File(result)
+                            MediaScannerConnection.scanFile(
+                                this@CropActivity,
+                                arrayOf(file.toString()), null
+                            ) { _, uri ->
+                                runOnUiThread {
+                                    val newUri = uri
+                                        ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                            FileProvider.getUriForFile(
+                                                this@CropActivity,
+                                                applicationContext.packageName + ".provider",
+                                                file
+                                            )
+                                        } else {
+                                            Uri.fromFile(file)
+                                        }
+                                    val galleryModel =
+                                        binding.viewModel?.getLastCroppedImage(
+                                            this@CropActivity,
+                                            newUri
+                                        )
+                                    val galleryModels = ArrayList<GalleryModel>()
+                                    galleryModels.add(galleryModel!!)
+                                    val intent = Intent()
+                                    intent.putExtra("GalleryModels", galleryModels)
+                                    intent.putExtra("position", binding.viewModel?.position)
+                                    setResult(RESULT_OK, intent)
+                                    finish_activity()
+                                }
                             }
-                        val galleryModel =
-                            binding.viewModel?.getLastCroppedImage(this@CropActivity, newUri)
-                        val galleryModels = ArrayList<GalleryModel>()
-                        galleryModels.add(galleryModel!!)
-                        val intent = Intent()
-                        intent.putExtra("GalleryModels", galleryModels)
-                        intent.putExtra("position", binding.viewModel?.position)
-                        setResult(RESULT_OK, intent)
-                        finish_activity()
+                        }
                     }
                 }
             }

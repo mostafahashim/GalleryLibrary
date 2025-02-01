@@ -17,9 +17,19 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import hashim.gallerylib.R
-import java.io.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
+import java.util.Random
 
 
 class DataProvider {
@@ -224,43 +234,41 @@ class DataProvider {
         return Type + System.currentTimeMillis() + "_" + R + extention
     }
 
-    fun saveImage(finalBitmap: Bitmap, context: Context): String {
+    suspend fun saveImage(finalBitmap: Bitmap, context: Context): Flow<String> = flow {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                var imageUri = addImageToGallery("", context)
+                val imageUri = addImageToGallery("", context)
                 if (imageUri != null) {
-                    var fos = context.contentResolver.openOutputStream(imageUri) as FileOutputStream
+                    val fos =
+                        context.contentResolver.openOutputStream(imageUri) as FileOutputStream
                     finalBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                     fos.flush()
                     fos.close()
-//                    val file = File(FileUtils(context).getPath(imageUri))
-                    var filePath = getImagePath(context, imageUri)
+                    val filePath = getImagePath(context, imageUri)
                     if (filePath != null) {
                         val file = File(filePath)
-                        return file.path
+                        emit(file.path)
                     }
-
                 }
             } else {
                 val path = getFilePath(TYPE_PHOTO_INTERNAL, context)
-                var imageUri = addImageToGallery(path, context)
+                val imageUri = addImageToGallery(path, context)
                 if (imageUri != null) {
-                    var filePath = getImagePath(context, imageUri)
+                    val filePath = getImagePath(context, imageUri)
                     if (filePath != null) {
                         val file = File(filePath)
-                        var fos = FileOutputStream(file)
+                        val fos = FileOutputStream(file)
                         finalBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                         fos.flush()
                         fos.close()
-                        return path
+                        emit(path)
                     }
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return ""
-    }
+    }.flowOn(Dispatchers.IO)
 
     fun addImageToGallery(filePath: String, context: Context): Uri? {
         val values = ContentValues()

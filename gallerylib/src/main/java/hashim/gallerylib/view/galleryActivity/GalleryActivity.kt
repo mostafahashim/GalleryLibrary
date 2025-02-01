@@ -36,6 +36,7 @@ import hashim.gallerylib.observer.OnBottomSheetItemClickListener
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
+import hashim.gallerylib.util.serializable
 import hashim.gallerylib.view.GalleryBaseActivity
 import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
@@ -58,10 +59,9 @@ class GalleryActivity : GalleryBaseActivity(
         setListener()
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun initializeViews() {
-        binding.viewModel?.selectedPhotos =
-            intent.extras!!.get(GalleryConstants.selected) as ArrayList<GalleryModel>
+        binding.viewModel?.selectedPhotos = intent.extras?.serializable<ArrayList<GalleryModel>>(GalleryConstants.selected)
+            ?: ArrayList()
         binding.viewModel?.maxSelectionCount =
             intent.getIntExtra(GalleryConstants.maxSelectionCount, 50)
         binding.viewModel?.columnsNumber?.value =
@@ -122,7 +122,10 @@ class GalleryActivity : GalleryBaseActivity(
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 binding.viewModel?.selectedPhotos =
-                    result.data?.extras?.get(GalleryConstants.selected) as ArrayList<GalleryModel>
+                    result.data?.extras?.serializable<java.util.ArrayList<GalleryModel>>(
+                        GalleryConstants.selected
+                    )
+                        ?: ArrayList()
                 getIntentForSelectedItems()
                 finish_activity()
             }
@@ -168,28 +171,28 @@ class GalleryActivity : GalleryBaseActivity(
             }
     }
 
-    var PERMISSIONS = ArrayList<String>()
-    fun checkPermissions(): Boolean {
-        PERMISSIONS = ArrayList()
-        PERMISSIONS.add(Manifest.permission.CAMERA)
-        PERMISSIONS.add(Manifest.permission.RECORD_AUDIO)
+    private var permissions = ArrayList<String>()
+    private fun checkPermissions(): Boolean {
+        permissions = ArrayList()
+        permissions.add(Manifest.permission.CAMERA)
+        permissions.add(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
-            PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES)
-            PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO)
-            PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO)
+            permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+            permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
+            permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
         } else {
-            PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         if (Build.VERSION.SDK_INT >= 23 && !hasPermissions(
                 this@GalleryActivity,
-                PERMISSIONS.toTypedArray()
+                permissions.toTypedArray()
             )
         ) {
             requestPermissions(
-                PERMISSIONS.toTypedArray(),
+                permissions.toTypedArray(),
                 GalleryConstants.REQUEST_Permission_Gallery
             )
             return false
@@ -215,7 +218,7 @@ class GalleryActivity : GalleryBaseActivity(
                 } else {
                     MaterialAlertDialogBuilder(this)
                         .setMessage(getString(R.string.you_should_allow_all_permissions_to_fetch_gallery_images))
-                        .setPositiveButton(getString(R.string.settings)) { dialog, which ->
+                        .setPositiveButton(getString(R.string.settings)) { _, _ ->
                             // Respond to positive button press
                             val intent = Intent()
                             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -227,7 +230,7 @@ class GalleryActivity : GalleryBaseActivity(
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             startActivity(intent)
                         }
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                        .setNegativeButton(getString(R.string.cancel)) { _, _ ->
                             // Respond to positive button press
                         }
                         .show()
@@ -426,8 +429,8 @@ class GalleryActivity : GalleryBaseActivity(
             context = this,
             images = galleryModels,
             imageLoader = object : ImageLoader<GalleryModel> {
-                override fun loadImage(imageView: ImageView?, model: GalleryModel?) {
-                    Glide.with(this@GalleryActivity).load(model?.url)
+                override fun loadImage(imageView: ImageView?, image: GalleryModel?) {
+                    Glide.with(this@GalleryActivity).load(image?.url)
                         .into(imageView!!)
                 }
             },

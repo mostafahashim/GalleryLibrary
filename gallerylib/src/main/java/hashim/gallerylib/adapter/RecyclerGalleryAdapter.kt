@@ -152,7 +152,7 @@ class RecyclerGalleryAdapter(
         return -1
     }
 
-    fun changeSelection(position: Int) {
+    private fun changeSelection(position: Int) {
         //get index in original before edit in item
         val indexInOriginal = getIndexFromOriginalList(filteredGalleryModels[position])
         if (filteredGalleryModels[position].isSelected) {

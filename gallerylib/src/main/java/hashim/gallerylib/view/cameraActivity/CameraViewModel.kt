@@ -19,7 +19,10 @@ import hashim.gallerylib.observer.OnItemSelectedListener
 import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -91,19 +94,14 @@ class CameraViewModel : ViewModel() {
     }
 
     fun saveCapturedFile() {
-        viewModelScope.launch {
-            observer.showLoader(true)
-            val imagePath = observer.saveImage()
-            savedFile = File(imagePath)
-            observer.showLoader(false)
-            observer.finishWithSuccess()
-        }
+        observer.showLoader(true)
+        observer.saveImage()
     }
 
     interface Observer {
         fun showLoader(isShow: Boolean)
         fun finishWithCancel()
         fun finishWithSuccess()
-        fun saveImage(): String
+        fun saveImage()
     }
 }
