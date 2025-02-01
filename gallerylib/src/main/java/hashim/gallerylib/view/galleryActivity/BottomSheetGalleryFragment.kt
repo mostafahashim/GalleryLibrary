@@ -260,6 +260,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     fetchData()
                 } else {
+                    if (!isAdded || activity.isFinishing || isStateSaved)
+                        return
                     MaterialAlertDialogBuilder(activity)
                         .setMessage(getString(R.string.you_should_allow_all_permissions_to_fetch_gallery_images))
                         .setPositiveButton(getString(R.string.settings)) { _, _ ->

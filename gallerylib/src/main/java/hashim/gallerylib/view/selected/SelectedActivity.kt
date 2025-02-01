@@ -16,6 +16,7 @@ import hashim.gallerylib.databinding.ActivitySelectedBinding
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.dpToPx
+import hashim.gallerylib.util.serializable
 import hashim.gallerylib.view.GalleryBaseActivity
 import hashim.gallerylib.view.crop.CropActivity
 
@@ -36,12 +37,13 @@ class SelectedActivity :
 
     override fun initializeViews() {
         binding.viewModel?.selectedPhotos =
-            intent.extras!!.get(GalleryConstants.selected) as ArrayList<GalleryModel>
+            intent.extras?.serializable<ArrayList<GalleryModel>>(GalleryConstants.selected)
+                ?: ArrayList()
         initViewPager()
     }
 
     val pagerAutoScrollHandler = Handler(Looper.getMainLooper())
-    fun initViewPager() {
+    private fun initViewPager() {
         binding.viewPagerActivityLanguage.visibility = View.VISIBLE
         binding.viewPagerActivityLanguage.apply {
             clipToPadding = false   // allow full width shown with padding
@@ -147,8 +149,9 @@ class SelectedActivity :
                 val position = result.data?.extras?.getInt("position", -1) ?: -1
                 if (position != -1) {
                     val galleryModels =
-                        result.data?.extras?.get("GalleryModels") as ArrayList<GalleryModel>
-                    if (!galleryModels.isNullOrEmpty()) {
+                        result.data?.extras?.serializable<ArrayList<GalleryModel>>("GalleryModels")
+                            ?: ArrayList()
+                    if (galleryModels.isNotEmpty()) {
                         binding.viewModel?.selectedPhotos!![position] = galleryModels[0]
                         binding.viewModel?.selectedPagerAdapter?.notifyItemChanged(position)
                     }

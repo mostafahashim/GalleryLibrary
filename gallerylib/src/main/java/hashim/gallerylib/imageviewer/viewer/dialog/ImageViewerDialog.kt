@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import hashim.gallerylib.R
 import hashim.gallerylib.imageviewer.viewer.builder.BuilderData
 import hashim.gallerylib.imageviewer.viewer.view.ImageViewerView
+import hashim.gallerylib.util.activity
 
 internal class ImageViewerDialog<T>(
     context: Context,
@@ -107,7 +108,12 @@ internal class ImageViewerDialog<T>(
             )
 
             onPageChange = { position -> builderData.imageChangeListener?.onImageChange(position) }
-            onDismiss = { dialog.dismiss() }
+            onDismiss = {
+                if (context != null && !context.activity().isFinishing) {
+                    dialog.dismiss()
+                }
+//                dialog.dismiss() }
+            }
         }
     }
 }
