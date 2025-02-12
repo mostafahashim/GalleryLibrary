@@ -204,6 +204,63 @@ class DataProvider {
         return file
     }
 
+    @SuppressLint("SimpleDateFormat")
+    fun getFile(type: String, context: Context, fileName: String): File {
+        val _filepath = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            context.getExternalFilesDir(null)?.path
+        } else {
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).path + "/" + context.getString(
+                R.string.app_name
+            )
+        }
+        var file: File? = null
+        var extention: String? = null
+        var Type = ""
+        when (type) {
+            TYPE_VIDEO_INTERNAL -> {
+                file = File(
+                    _filepath,
+                    context.resources.getString(R.string.app_name) + "/" + context.resources.getString(
+                        R.string.app_name
+                    ) + " " + VIDEO_FOLDER
+                )
+                extention = ".mp4"
+                Type = "VID_"
+            }
+
+            TYPE_PHOTO_INTERNAL -> {
+                file = File(
+                    _filepath,
+                    context.resources.getString(R.string.app_name) + "/" + context.resources.getString(
+                        R.string.app_name
+                    ) + " " + IMAGE_FOLDER
+                )
+                extention = ".jpg"
+                Type = "IMG_"
+            }
+
+            TYPE_TEMP -> {
+                file = File(
+                    _filepath,
+                    context.resources.getString(R.string.app_name) + "/" + context.resources.getString(
+                        R.string.app_name
+                    ) + " " + TEMP_FOLDER
+                )
+                extention = ".jpg"
+                Type = "IMG_"
+            }
+
+            else -> {
+            }
+        }
+
+        if (!file!!.exists()) {
+            file.mkdirs()
+        }
+        file = File(file.toString() + File.separator + Type + fileName + extention)
+        return file
+    }
+
 
     fun getRandomName(type: String, path: String): String {
         val r = Random()
