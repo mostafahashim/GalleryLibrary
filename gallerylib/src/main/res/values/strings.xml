@@ -30,4 +30,8 @@
     <string name="_9_16">9:16</string>
     <string name="_3_2">3:2</string>
     <string name="_2_3">2:3</string>
+
+    <string name="cab_title_x">Selection (%1$d)</string>
+    <string name="range_selection">Range Selection</string>
+    <string name="path_selection">Path Selection</string>
 </resources>

@@ -115,6 +115,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         binding.imgviewBackGalleryActivity.setOnClickListener {
             dismissAllowingStateLoss()
         }
+
     }
 
     override fun onDismiss(dialog: DialogInterface) {

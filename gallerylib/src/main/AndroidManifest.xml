@@ -4,11 +4,6 @@
 
     <dist:module dist:instant="true" />
 
-    <!--    Without this folders will be inaccessible in Android-11 and above devices-->
-    <!--    <uses-permission-->
-    <!--        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"-->
-    <!--        tools:ignore="ScopedStorage" />-->
-
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
@@ -42,42 +37,36 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
-        android:resizeableActivity="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true"
+        android:theme="@style/LibTheme"
         tools:replace="android:allowBackup,android:supportsRtl,android:theme,android:hardwareAccelerated">
 
         <activity
             android:name="hashim.gallerylib.view.galleryActivity.GalleryActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"
-            android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar.LightScreen"
+            android:theme="@style/LibTheme.NoActionBar.LightScreen"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="hashim.gallerylib.view.selected.SelectedActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"
-            android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar.LightScreen"
+            android:theme="@style/LibTheme.NoActionBar.LightScreen"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="hashim.gallerylib.view.crop.CropActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"
-            android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar.LightScreen"
+            android:theme="@style/LibTheme.NoActionBar.LightScreen"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="hashim.gallerylib.view.cameraActivity.CameraActivity"
             android:configChanges="density|keyboard|keyboardHidden|orientation|screenSize|locale|layoutDirection"
             android:hardwareAccelerated="true"
-            android:resizeableActivity="false"
-            android:theme="@style/AppTheme.FullScreen.LightScreen"
+            android:theme="@style/LibTheme.FullScreen.LightScreen"
             android:windowSoftInputMode="adjustResize" />
 
         <provider

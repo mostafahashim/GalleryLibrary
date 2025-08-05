@@ -1,21 +1,22 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="LibTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:forceDarkAllowed" tools:ignore="NewApi">false</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="LibTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:splitMotionEvents">false</item>
         <item name="android:windowEnableSplitTouch">false</item>
     </style>
 
-    <style name="AppTheme.NoActionBar.DarkScreen">
+    <style name="LibTheme.NoActionBar.DarkScreen">
         <item name="colorControlNormal">@color/white</item>
         <item name="colorControlActivated">@color/white</item>
         <item name="colorControlHighlight">@color/colorPrimaryDark</item>
@@ -23,7 +24,7 @@
         <item name="android:windowEnableSplitTouch">false</item>
     </style>
 
-    <style name="AppTheme.NoActionBar.LightScreen">
+    <style name="LibTheme.NoActionBar.LightScreen">
         <item name="colorControlNormal">@color/colorPrimaryDark</item>
         <item name="colorControlActivated">@color/colorPrimaryDark</item>
         <item name="colorControlHighlight">@color/colorPrimaryDark</item>
@@ -31,11 +32,11 @@
         <item name="android:windowEnableSplitTouch">false</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="LibTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="LibTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="AppTheme.FullScreen">
+    <style name="LibTheme.FullScreen">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>
@@ -50,7 +51,7 @@
         <item name="android:windowEnableSplitTouch">false</item>
     </style>
 
-    <style name="AppTheme.FullScreen.DarkScreen">
+    <style name="LibTheme.FullScreen.DarkScreen">
         <item name="colorControlNormal">@color/white</item>
         <item name="colorControlActivated">@color/white</item>
         <item name="colorControlHighlight">@color/colorPrimaryDark</item>
@@ -58,7 +59,7 @@
         <item name="android:windowEnableSplitTouch">false</item>
     </style>
 
-    <style name="AppTheme.FullScreen.LightScreen">
+    <style name="LibTheme.FullScreen.LightScreen">
         <item name="colorControlNormal">@color/colorPrimaryDark</item>
         <item name="colorControlActivated">@color/colorPrimaryDark</item>
         <item name="colorControlHighlight">@color/colorPrimaryDark</item>
@@ -100,9 +101,9 @@
         <item name="android:windowFrame">@null</item>
     </style>
 
-    <style name="ImageViewerDialog" parent="android:Theme.Translucent.NoTitleBar"/>
+    <style name="ImageViewerDialog" parent="android:Theme.Translucent.NoTitleBar" />
 
-    <style name="ImageViewerDialog.NoStatusBar" parent="android:Theme.Translucent.NoTitleBar.Fullscreen"/>
+    <style name="ImageViewerDialog.NoStatusBar" parent="android:Theme.Translucent.NoTitleBar.Fullscreen" />
 
     <style name="ImageViewerDialog.Default" parent="android:Theme.Translucent.NoTitleBar">
         <item name="android:windowTranslucentStatus">true</item>
