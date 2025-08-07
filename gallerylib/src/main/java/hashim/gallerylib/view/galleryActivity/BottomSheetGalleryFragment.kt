@@ -224,13 +224,20 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
     private fun checkPermissions(): Boolean {
         permissions = ArrayList()
         permissions.add(Manifest.permission.CAMERA)
-        permissions.add(Manifest.permission.RECORD_AUDIO)
+        if (binding.viewModel?.showType == GalleryConstants.GalleryTypeVideos
+            || binding.viewModel?.showType == GalleryConstants.GalleryTypeImagesAndVideos
+        )
+            permissions.add(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
-            permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
-            permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
+            if (binding.viewModel?.showType == GalleryConstants.GalleryTypeVideos
+                || binding.viewModel?.showType == GalleryConstants.GalleryTypeImagesAndVideos
+            ) {
+                permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
+                permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
+            }
         } else {
             permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
