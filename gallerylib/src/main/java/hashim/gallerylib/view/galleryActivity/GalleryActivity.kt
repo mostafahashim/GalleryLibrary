@@ -2,6 +2,7 @@ package hashim.gallerylib.view.galleryActivity
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -44,8 +45,7 @@ import java.util.*
 
 
 class GalleryActivity : GalleryBaseActivity(
-    R.string.gallery, false, true, true, false,
-    false, true, true
+    R.string.gallery, false, true, true, false, false, true, true
 ), GalleryViewModel.Observer {
 
     lateinit var binding: BottomSheetGalleryBinding
@@ -60,14 +60,14 @@ class GalleryActivity : GalleryBaseActivity(
     }
 
     override fun initializeViews() {
-        binding.viewModel?.selectedPhotos = intent.extras?.serializable<ArrayList<GalleryModel>>(GalleryConstants.selected)
-            ?: ArrayList()
+        binding.viewModel?.selectedPhotos =
+            intent.extras?.serializable<ArrayList<GalleryModel>>(GalleryConstants.selected)
+                ?: ArrayList()
         binding.viewModel?.maxSelectionCount =
             intent.getIntExtra(GalleryConstants.maxSelectionCount, 50)
         binding.viewModel?.columnsNumber?.value =
             intent.getIntExtra(GalleryConstants.gridColumnsCount, 3)
-        binding.viewModel?.isOpenEdit =
-            intent.getBooleanExtra(GalleryConstants.isOpenEdit, false)
+        binding.viewModel?.isOpenEdit = intent.getBooleanExtra(GalleryConstants.isOpenEdit, false)
         binding.viewModel?.showType =
             intent.getStringExtra(GalleryConstants.showType) ?: GalleryConstants.GalleryTypeImages
 
@@ -105,9 +105,8 @@ class GalleryActivity : GalleryBaseActivity(
             Intent(this@GalleryActivity, SelectedActivity::class.java).also {
                 it.putExtra(GalleryConstants.selected, binding.viewModel?.selectedPhotos)
                 var locale = "en"
-                if (intent.hasExtra(GalleryConstants.Language))
-                    locale =
-                        intent.getStringExtra(GalleryConstants.Language) ?: GalleryConstants.ENGLISH
+                if (intent.hasExtra(GalleryConstants.Language)) locale =
+                    intent.getStringExtra(GalleryConstants.Language) ?: GalleryConstants.ENGLISH
                 it.putExtra(GalleryConstants.Language, locale)
                 cropResultLauncher.launch(it)
             }
@@ -124,8 +123,7 @@ class GalleryActivity : GalleryBaseActivity(
                 binding.viewModel?.selectedPhotos =
                     result.data?.extras?.serializable<java.util.ArrayList<GalleryModel>>(
                         GalleryConstants.selected
-                    )
-                        ?: ArrayList()
+                    ) ?: ArrayList()
                 getIntentForSelectedItems()
                 finish_activity()
             }
@@ -161,31 +159,43 @@ class GalleryActivity : GalleryBaseActivity(
         bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
     }
 
+
+    @SuppressLint("NotifyDataSetChanged")
     private fun fetchData() {
-        if (checkPermissions())
-            Handler(Looper.getMainLooper()).post {
-                binding.viewModel?.recyclerGalleryAdapter?.addAll(
-                    binding.viewModel?.getGalleryPhotosAndVideos(this as Context) ?: ArrayList()
-                )
-                binding.viewModel?.checkImageStatus(this)
+        if (checkPermissions(
+                isFromCameraImage = false,
+                isFromCameraVideo = false, requestFrom = permissionFromFetchData
+            )
+        ) {
+            binding.rcGallery.post {
+//                Handler(Looper.getMainLooper()).post {
+                    binding.viewModel?.recyclerGalleryAdapter?.addAll(
+                        binding.viewModel?.getGalleryPhotosAndVideos(this as Context) ?: ArrayList()
+                    )
+                    binding.viewModel?.checkImageStatus(this)
+//                }
             }
+        }
     }
 
     private var permissions = ArrayList<String>()
-    private fun checkPermissions(): Boolean {
+    var permissionRequestedFrom: Int = 0
+    val permissionFromFetchData = 1
+    val permissionFromCameraImage = 2
+    val permissionFromCameraVideo = 3
+
+    private fun checkPermissions(
+        isFromCameraImage: Boolean, isFromCameraVideo: Boolean,
+        requestFrom: Int
+    ): Boolean {
+        permissionRequestedFrom = requestFrom
         permissions = ArrayList()
-        permissions.add(Manifest.permission.CAMERA)
-        if (binding.viewModel?.showType == GalleryConstants.GalleryTypeVideos
-            || binding.viewModel?.showType == GalleryConstants.GalleryTypeImagesAndVideos
-        )
-            permissions.add(Manifest.permission.RECORD_AUDIO)
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
-            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (isFromCameraImage || isFromCameraVideo) permissions.add(Manifest.permission.CAMERA)
+        if (isFromCameraVideo) permissions.add(Manifest.permission.RECORD_AUDIO)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
-            if (binding.viewModel?.showType == GalleryConstants.GalleryTypeVideos
-                || binding.viewModel?.showType == GalleryConstants.GalleryTypeImagesAndVideos
-            ) {
+            if (binding.viewModel?.showType == GalleryConstants.GalleryTypeVideos || binding.viewModel?.showType == GalleryConstants.GalleryTypeImagesAndVideos) {
                 permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
                 permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
             }
@@ -194,13 +204,11 @@ class GalleryActivity : GalleryBaseActivity(
         }
 
         if (Build.VERSION.SDK_INT >= 23 && !hasPermissions(
-                this@GalleryActivity,
-                permissions.toTypedArray()
+                this@GalleryActivity, permissions.toTypedArray()
             )
         ) {
             requestPermissions(
-                permissions.toTypedArray(),
-                GalleryConstants.REQUEST_Permission_Gallery
+                permissions.toTypedArray(), GalleryConstants.REQUEST_Permission_Gallery
             )
             return false
         }
@@ -212,35 +220,33 @@ class GalleryActivity : GalleryBaseActivity(
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             GalleryConstants.REQUEST_Permission_Gallery ->
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    fetchData()
+                    when (permissionRequestedFrom) {
+                        permissionFromFetchData -> fetchData()
+                        permissionFromCameraImage -> captureImage()
+                        permissionFromCameraVideo -> captureVideo()
+                    }
                 } else {
-                    MaterialAlertDialogBuilder(this)
-                        .setMessage(getString(R.string.you_should_allow_all_permissions_to_fetch_gallery_images))
+                    MaterialAlertDialogBuilder(this).setMessage(getString(R.string.you_should_allow_all_permissions_to_fetch_gallery_images))
                         .setPositiveButton(getString(R.string.settings)) { _, _ ->
                             // Respond to positive button press
                             val intent = Intent()
                             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                             val uri = Uri.fromParts(
-                                "package",
-                                packageName, null
+                                "package", packageName, null
                             )
                             intent.data = uri
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             startActivity(intent)
-                        }
-                        .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                        }.setNegativeButton(getString(R.string.cancel)) { _, _ ->
                             // Respond to positive button press
-                        }
-                        .show()
+                        }.show()
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -251,16 +257,18 @@ class GalleryActivity : GalleryBaseActivity(
     }
 
     override fun captureVideo() {
-        if (!checkPermissions())
-            return
+        if (!checkPermissions(
+                isFromCameraImage = false,
+                isFromCameraVideo = true,
+                requestFrom = permissionFromCameraVideo
+            )
+        ) return
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
         binding.viewModel?.tempCaptueredFile =
-            DataProvider()
-                .getFile(GalleryConstants.TYPE_VIDEO_INTERNAL, applicationContext)
+            DataProvider().getFile(GalleryConstants.TYPE_VIDEO_INTERNAL, applicationContext)
         val videoTimeInMinutes = 1 * 60
         intent.putExtra(
-            MediaStore.EXTRA_DURATION_LIMIT,
-            videoTimeInMinutes
+            MediaStore.EXTRA_DURATION_LIMIT, videoTimeInMinutes
         )
 
         val mVideoUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -287,12 +295,11 @@ class GalleryActivity : GalleryBaseActivity(
                     // Tell the media scanner about the new file so that it is
                     // immediately available to the user.
                     MediaScannerConnection.scanFile(
-                        this,
-                        arrayOf(binding.viewModel?.tempCaptueredFile.toString()), null
+                        this, arrayOf(binding.viewModel?.tempCaptueredFile.toString()), null
                     ) { _, uri ->
                         runOnUiThread {
-                            val newUri = uri
-                                ?: if (result.data != null && result.data?.data != null) {
+                            val newUri =
+                                uri ?: if (result.data != null && result.data?.data != null) {
                                     result.data?.data!!
                                 } else {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -339,11 +346,15 @@ class GalleryActivity : GalleryBaseActivity(
 
 
     override fun captureImage() {
-        if (!checkPermissions())
-            return
+        if (!checkPermissions(
+                isFromCameraImage = true,
+                isFromCameraVideo = false,
+                requestFrom = permissionFromCameraImage
+            )
+        ) return
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        binding.viewModel?.tempCaptueredFile = DataProvider()
-            .getFile(DataProvider.TYPE_PHOTO_INTERNAL, applicationContext)
+        binding.viewModel?.tempCaptueredFile =
+            DataProvider().getFile(DataProvider.TYPE_PHOTO_INTERNAL, applicationContext)
 
         if (binding.viewModel?.tempCaptueredFile != null) {
             val photoURI = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -372,12 +383,11 @@ class GalleryActivity : GalleryBaseActivity(
                     // Tell the media scanner about the new file so that it is
                     // immediately available to the user.
                     MediaScannerConnection.scanFile(
-                        this,
-                        arrayOf(binding.viewModel?.tempCaptueredFile.toString()), null
+                        this, arrayOf(binding.viewModel?.tempCaptueredFile.toString()), null
                     ) { _, uri ->
                         runOnUiThread {
-                            val newUri = uri
-                                ?: if (result.data != null && result.data?.data != null) {
+                            val newUri =
+                                uri ?: if (result.data != null && result.data?.data != null) {
                                     result.data?.data!!
                                 } else {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -424,21 +434,17 @@ class GalleryActivity : GalleryBaseActivity(
 
     private var viewer: ImageViewer<GalleryModel>? = null
     override fun openImageViewer(
-        position: Int,
-        imageView: ImageView,
-        galleryModels: ArrayList<GalleryModel>
+        position: Int, imageView: ImageView, galleryModels: ArrayList<GalleryModel>
     ) {
         //new list without first item because it add button
-        if (galleryModels.isEmpty())
-            return
+        if (galleryModels.isEmpty()) return
 
         viewer = ImageViewer.Companion.Builder(
             context = this,
             images = galleryModels,
             imageLoader = object : ImageLoader<GalleryModel> {
                 override fun loadImage(imageView: ImageView?, image: GalleryModel?) {
-                    Glide.with(this@GalleryActivity).load(image?.url)
-                        .into(imageView!!)
+                    Glide.with(this@GalleryActivity).load(image?.url).into(imageView!!)
                 }
             },
             viewHolderLoader = object : ViewHolderLoader<GalleryModel> {
@@ -449,9 +455,7 @@ class GalleryActivity : GalleryBaseActivity(
                         photoView,
                     )
                 }
-            }
-        ).withStartPosition(position)
-            .withTransitionFrom(imageView)
+            }).withStartPosition(position).withTransitionFrom(imageView)
             .withImageChangeListener(object : OnImageChangeListener {
                 override fun onImageChange(position: Int) {
                     binding.rcGallery.scrollToPosition(position)
@@ -467,11 +471,8 @@ class GalleryActivity : GalleryBaseActivity(
                 override fun onDismiss() {
                     //do any thing when dismiss
                 }
-            }).withHiddenStatusBar(false)
-            .withImagesMargin(R.dimen.padding_10)
-            .withContainerPadding(R.dimen.padding_0)
-            .allowZooming(true)
-            .allowSwipeToDismiss(true)
+            }).withHiddenStatusBar(false).withImagesMargin(R.dimen.padding_10)
+            .withContainerPadding(R.dimen.padding_0).allowZooming(true).allowSwipeToDismiss(true)
             .show()
 
     }

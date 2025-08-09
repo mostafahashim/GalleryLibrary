@@ -1,6 +1,7 @@
 package hashim.gallerylib.view.galleryActivity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -50,6 +51,7 @@ import hashim.gallerylib.util.ScreenSizeUtils
 import hashim.gallerylib.util.serializable
 import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
+import java.util.ArrayList
 import java.util.Collections
 
 
@@ -194,15 +196,23 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         bottomSheetFragment.show(activity.supportFragmentManager, bottomSheetFragment.tag)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun fetchData() {
-        if (checkPermissions())
-            Handler(Looper.getMainLooper()).post {
+        if (checkPermissions(
+                isFromCameraImage = false,
+                isFromCameraVideo = false,
+                requestFrom = permissionFromFetchData
+            )
+        ) {
+            binding.rcGallery.post {
+//                Handler(Looper.getMainLooper()).post{
                 binding.viewModel?.recyclerGalleryAdapter?.addAll(
-                    binding.viewModel?.getGalleryPhotosAndVideos(activity)
-                        ?: ArrayList()
+                    binding.viewModel?.getGalleryPhotosAndVideos(activity) ?: ArrayList()
                 )
                 binding.viewModel?.checkImageStatus(activity)
+//                }
             }
+        }
     }
 
     private var permissions = ArrayList<String>()
@@ -221,12 +231,21 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         return true
     }
 
-    private fun checkPermissions(): Boolean {
+    var permissionRequestedFrom: Int = 0
+    val permissionFromFetchData = 1
+    val permissionFromCameraImage = 2
+    val permissionFromCameraVideo = 3
+
+    private fun checkPermissions(
+        isFromCameraImage: Boolean,
+        isFromCameraVideo: Boolean,
+        requestFrom: Int
+    ): Boolean {
+        permissionRequestedFrom = requestFrom
         permissions = ArrayList()
-        permissions.add(Manifest.permission.CAMERA)
-        if (binding.viewModel?.showType == GalleryConstants.GalleryTypeVideos
-            || binding.viewModel?.showType == GalleryConstants.GalleryTypeImagesAndVideos
-        )
+        if (isFromCameraImage || isFromCameraVideo)
+            permissions.add(Manifest.permission.CAMERA)
+        if (isFromCameraVideo)
             permissions.add(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -266,7 +285,11 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             GalleryConstants.REQUEST_Permission_Gallery ->
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    fetchData()
+                    when (permissionRequestedFrom) {
+                        permissionFromFetchData -> fetchData()
+                        permissionFromCameraImage -> captureImage()
+                        permissionFromCameraVideo -> captureVideo()
+                    }
                 } else {
                     if (!isAdded || activity.isFinishing || isStateSaved)
                         return
@@ -298,7 +321,12 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
     }
 
     override fun captureVideo() {
-        if (!checkPermissions())
+        if (!checkPermissions(
+                isFromCameraImage = false,
+                isFromCameraVideo = true,
+                requestFrom = permissionFromCameraVideo
+            )
+        )
             return
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
         binding.viewModel?.tempCaptueredFile =
@@ -386,7 +414,12 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
 
 
     override fun captureImage() {
-        if (!checkPermissions())
+        if (!checkPermissions(
+                isFromCameraImage = true,
+                isFromCameraVideo = false,
+                requestFrom = permissionFromCameraImage
+            )
+        )
             return
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         binding.viewModel?.tempCaptueredFile = DataProvider()
