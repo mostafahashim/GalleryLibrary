@@ -49,6 +49,7 @@ import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
 import hashim.gallerylib.util.serializable
+import hashim.gallerylib.util.updateIntentForCameraFacing
 import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
 import java.util.ArrayList
@@ -352,6 +353,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             MediaStore.EXTRA_OUTPUT, mVideoUri
         )
         intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
+        //force rear camera not front camera
+        updateIntentForCameraFacing(intent, false)
         videoResultLauncher.launch(intent)
     }
 
@@ -437,6 +440,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             }
 
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+            //force rear camera not front camera
+            updateIntentForCameraFacing(takePictureIntent, false)
             imageResultLauncher.launch(takePictureIntent)
         }
     }

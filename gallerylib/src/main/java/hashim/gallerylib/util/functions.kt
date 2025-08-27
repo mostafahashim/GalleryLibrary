@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.hardware.camera2.CameraCharacteristics
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -227,4 +228,63 @@ fun getLastCapturedGalleryVideo(context: Context, uri: Uri): GalleryModel? {
     }
 
     return null
+}
+
+fun updateIntentForCameraFacing(cameraIntent: Intent, frontFacing: Boolean) {
+    if (frontFacing) {
+        cameraIntent.putExtra(
+            "android.intent.extras.CAMERA_FACING",
+            CameraCharacteristics.LENS_FACING_FRONT
+        )
+        cameraIntent.putExtra("android.intent.extras.LENS_FACING_FRONT", 1)
+        cameraIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", true)
+        cameraIntent.putExtra("com.google.assistant.extra.USE_FRONT_CAMERA", true)
+        //samsung
+        cameraIntent.putExtra("camerafacing", "front")
+        val brand = Build.BRAND
+        val manufacturer = Build.MANUFACTURER
+        if (brand?.contains(
+                "samsung",
+                ignoreCase = true
+            ) == true || manufacturer?.contains("samsung", ignoreCase = true) == true
+        ) {
+            cameraIntent.putExtra("previous_mode", "front")
+        } else {
+            cameraIntent.putExtra("previous_mode", "Selfie")
+        }
+        if (brand?.contains(
+                "honor",
+                ignoreCase = true
+            ) == true || manufacturer?.contains("honor", ignoreCase = true) == true
+        ) {
+            // Extras for displaying the front camera on Honor
+            cameraIntent.putExtra("default_camera", "1")
+            cameraIntent.putExtra("default_mode", "com.hihonor.camera2.mode.photo.PhotoMode")
+        } else if (brand?.contains(
+                "huawei",
+                ignoreCase = true
+            ) == true || manufacturer?.contains("huawei", ignoreCase = true) == true
+        ) {
+            // Extras for displaying the front camera on Huawei
+            cameraIntent.putExtra("default_camera", "1")
+            cameraIntent.putExtra("default_mode", "com.huawei.camera2.mode.photo.PhotoMode")
+        }
+    } else {
+        cameraIntent.putExtra(
+            "android.intent.extras.CAMERA_FACING",
+            CameraCharacteristics.LENS_FACING_BACK
+        )
+        cameraIntent.putExtra("android.intent.extras.LENS_FACING",
+            CameraCharacteristics.LENS_FACING_BACK)
+        cameraIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", false)
+        //samsung
+        cameraIntent.putExtra("camerafacing", "rear")
+        cameraIntent.putExtra("previous_mode", "rear")
+
+        cameraIntent.putExtra("android.intent.extras.CAMERA_FACING", 0)
+        cameraIntent.putExtra("android.intent.extra.CAMERA_FACING", 0)
+        cameraIntent.putExtra("default_camera", "0")
+
+
+    }
 }
