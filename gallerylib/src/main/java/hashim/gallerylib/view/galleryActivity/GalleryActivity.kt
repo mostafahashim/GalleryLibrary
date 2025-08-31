@@ -38,6 +38,7 @@ import hashim.gallerylib.util.DataProvider
 import hashim.gallerylib.util.GalleryConstants
 import hashim.gallerylib.util.ScreenSizeUtils
 import hashim.gallerylib.util.serializable
+import hashim.gallerylib.util.updateIntentForCameraFacing
 import hashim.gallerylib.view.GalleryBaseActivity
 import hashim.gallerylib.view.selected.SelectedActivity
 import hashim.gallerylib.view.sub.BottomSheetAlbumsFragment
@@ -285,6 +286,8 @@ class GalleryActivity : GalleryBaseActivity(
             MediaStore.EXTRA_OUTPUT, mVideoUri
         )
         intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
+        //force rear camera not front camera
+        updateIntentForCameraFacing(intent, false)
         videoResultLauncher.launch(intent)
     }
 
@@ -316,7 +319,7 @@ class GalleryActivity : GalleryBaseActivity(
                                 binding.viewModel?.getLastCapturedGalleryVideo(this, newUri)
                             if (galleryModel != null) {
                                 binding.viewModel?.selectedAlbumName?.value =
-                                    getString(R.string.all)
+                                    getString(R.string.all_albums)
                                 binding.viewModel?.recyclerGalleryAdapter?.filter("")
                                 binding.rcGallery.scrollToPosition(0)
                                 binding.viewModel?.recyclerGalleryAdapter?.deselectAll()
@@ -368,12 +371,10 @@ class GalleryActivity : GalleryBaseActivity(
             }
 
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+            //force rear camera not front camera
+            updateIntentForCameraFacing(takePictureIntent, false)
             imageResultLauncher.launch(takePictureIntent)
         }
-//        if (!checkPermissions())
-//            return
-//        val intent = Intent(this@GalleryActivity, CameraActivity::class.java)
-//        imageResultLauncher.launch(intent)
     }
 
     private var imageResultLauncher =
@@ -404,7 +405,7 @@ class GalleryActivity : GalleryBaseActivity(
                                 binding.viewModel?.getLastCapturedGalleryImage(this, newUri)
                             if (galleryModel != null) {
                                 binding.viewModel?.selectedAlbumName?.value =
-                                    getString(R.string.all)
+                                    getString(R.string.all_albums)
                                 binding.viewModel?.recyclerGalleryAdapter?.filter("")
                                 binding.rcGallery.scrollToPosition(0)
                                 binding.viewModel?.recyclerGalleryAdapter?.deselectAll()

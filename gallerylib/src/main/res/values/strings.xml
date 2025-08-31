@@ -34,4 +34,5 @@
     <string name="cab_title_x">Selection (%1$d)</string>
     <string name="range_selection">Range Selection</string>
     <string name="path_selection">Path Selection</string>
+    <string name="all_albums">All Albums</string>
 </resources>

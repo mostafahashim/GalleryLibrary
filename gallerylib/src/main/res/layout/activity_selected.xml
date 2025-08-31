@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -70,11 +71,30 @@
             </LinearLayout>
         </RelativeLayout>
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager_ActivityLanguage"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/black" />
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:paddingBottom="@dimen/padding_15">
 
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager_ActivityLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerSelectedItemsThumbnails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:adapter="@{viewModel.recyclerSelectedThumbnailsAdapter}"
+                android:orientation="horizontal"
+                android:visibility="@{viewModel.isItemsMoreThanOne?View.VISIBLE:View.GONE}"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:spanCount="1"
+                tools:listitem="@layout/item_recycler_thumbnail" />
+        </RelativeLayout>
     </LinearLayout>
 </layout>

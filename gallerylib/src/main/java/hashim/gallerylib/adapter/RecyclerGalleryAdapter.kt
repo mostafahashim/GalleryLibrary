@@ -54,18 +54,6 @@ class RecyclerGalleryAdapter(
         //show counter if selection count > 1
         holder.binding.showCounter = maxSelectionCount > 1
 
-//        if (filteredGalleryModels[holder.layoutPosition].type.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
-//            //image type
-//            filteredGalleryModels[holder.layoutPosition].url =
-//                "file://" + filteredGalleryModels[holder.layoutPosition].sdcardPath
-//            filteredGalleryModels[holder.layoutPosition].isVideo = false
-//        } else if (filteredGalleryModels[holder.layoutPosition].type.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
-//            //video type
-//            filteredGalleryModels[holder.layoutPosition].url =
-//                Uri.fromFile(File(filteredGalleryModels[holder.layoutPosition].sdcardPath))
-//                    .toString()
-//            filteredGalleryModels[holder.layoutPosition].isVideo = true
-//        }
         holder.binding.model = filteredGalleryModels[holder.layoutPosition]
         holder.binding.imgviewPreview.setOnClickListener { imageview ->
             onItemSelectedListener.onImageView(

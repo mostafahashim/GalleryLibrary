@@ -387,7 +387,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
                                 binding.viewModel?.getLastCapturedGalleryVideo(activity, newUri)
                             if (galleryModel != null) {
                                 binding.viewModel?.selectedAlbumName?.value =
-                                    getString(R.string.all)
+                                    getString(R.string.all_albums)
                                 binding.viewModel?.recyclerGalleryAdapter?.filter("")
                                 binding.rcGallery.scrollToPosition(0)
                                 binding.viewModel?.recyclerGalleryAdapter?.deselectAll()
@@ -475,7 +475,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
                                 binding.viewModel?.getLastCapturedGalleryImage(activity, newUri)
                             if (galleryModel != null) {
                                 binding.viewModel?.selectedAlbumName?.value =
-                                    getString(R.string.all)
+                                    getString(R.string.all_albums)
                                 binding.viewModel?.recyclerGalleryAdapter?.filter("")
                                 binding.rcGallery.scrollToPosition(0)
                                 binding.viewModel?.recyclerGalleryAdapter?.deselectAll()

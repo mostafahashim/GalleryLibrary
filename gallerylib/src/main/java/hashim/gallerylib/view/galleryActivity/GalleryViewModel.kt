@@ -16,6 +16,7 @@ import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.observer.OnItemSelectedListener
 import hashim.gallerylib.util.GalleryConstants
 import java.io.File
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class GalleryViewModel : ViewModel() {
@@ -43,7 +44,8 @@ class GalleryViewModel : ViewModel() {
         val columnWidth = ((352.00 / columnsNumber.value!!) * screenWidth) / 360.00
 
         recyclerGalleryAdapter =
-            RecyclerGalleryAdapter(columnWidth,
+            RecyclerGalleryAdapter(
+                columnWidth,
                 maxSelectionCount,
                 ArrayList(),
                 object :
@@ -251,6 +253,7 @@ class GalleryViewModel : ViewModel() {
                         if (item.videoDuration > 0) {
                             item.videoDurationFormatted =
                                 String.format(
+                                    Locale.getDefault(),
                                     "%d:%d",
                                     TimeUnit.MILLISECONDS.toMinutes(item.videoDuration),
                                     TimeUnit.MILLISECONDS.toSeconds(item.videoDuration) -
@@ -322,7 +325,7 @@ class GalleryViewModel : ViewModel() {
         var galleryList = ArrayList<GalleryModel>()
         try {
             albumModels = ArrayList()
-            albumModels.add(AlbumModel(name = context.getString(R.string.all)))
+            albumModels.add(AlbumModel(name = context.getString(R.string.all_albums)))
             selectedAlbumName.value = albumModels[0].name
             fromCameraContainer.value = true
             if (showType.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
@@ -341,7 +344,7 @@ class GalleryViewModel : ViewModel() {
                 btnCameraPhotoVisible.value = true
                 btnCameraVideoVisible.value = true
             }
-            showHideButtonDone(selectedPhotos.size > 0)
+            showHideButtonDone(selectedPhotos.isNotEmpty())
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -401,15 +404,15 @@ class GalleryViewModel : ViewModel() {
                 // get date modified
                 var dateColumnIndex = imagecursor
                     .getColumnIndex(MediaStore.Images.Media.DATE_MODIFIED)
-                var Image_date = imagecursor.getString(dateColumnIndex)
-                if (Image_date != null) {
-                    item.item_date_modified = Integer.parseInt(Image_date)
+                var imageDate = imagecursor.getString(dateColumnIndex)
+                if (imageDate != null) {
+                    item.item_date_modified = Integer.parseInt(imageDate)
                 } else {
                     dateColumnIndex = imagecursor
                         .getColumnIndex(MediaStore.Images.Media.DATE_ADDED)
-                    Image_date = imagecursor.getString(dateColumnIndex)
-                    if (Image_date != null) {
-                        item.item_date_modified = Integer.parseInt(Image_date)
+                    imageDate = imagecursor.getString(dateColumnIndex)
+                    if (imageDate != null) {
+                        item.item_date_modified = Integer.parseInt(imageDate)
                     } else {
                         item.item_date_modified = SystemClock.elapsedRealtime().toInt()
                     }
@@ -523,6 +526,7 @@ class GalleryViewModel : ViewModel() {
                     if (item.videoDuration > 0) {
                         item.videoDurationFormatted =
                             String.format(
+                                Locale.getDefault(),
                                 "%d:%d",
                                 TimeUnit.MILLISECONDS.toMinutes(item.videoDuration),
                                 TimeUnit.MILLISECONDS.toSeconds(item.videoDuration) -
@@ -598,7 +602,7 @@ class GalleryViewModel : ViewModel() {
             isHasMedia.value = true
             //select album if all selected items in one album, else select all albums
             if (selectedPhotos.isEmpty()) {
-                selectedAlbumName.value = context.getString(R.string.all)
+                selectedAlbumName.value = context.getString(R.string.all_albums)
                 return
             }
             val albumName = selectedPhotos[0].albumName
@@ -614,7 +618,7 @@ class GalleryViewModel : ViewModel() {
                 //change album name in dropdown
                 selectedAlbumName.value = albumName
             } else {
-                selectedAlbumName.value = context.getString(R.string.all)
+                selectedAlbumName.value = context.getString(R.string.all_albums)
             }
         }
     }

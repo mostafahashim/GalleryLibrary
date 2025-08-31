@@ -3,18 +3,16 @@
 
     <item android:state_pressed="true">
         <shape>
-            <corners android:topLeftRadius="8dp" android:topRightRadius="8dp" />
+            <corners android:radius="8dp" />
 
             <solid android:color="@color/white_smoke" />
-            <stroke android:width="0dp" android:color="@color/gainsboro_1" />
         </shape>
     </item>
     <item>
         <shape>
-            <corners android:topLeftRadius="8dp" android:topRightRadius="8dp" />
+            <corners android:radius="8dp" />
 
             <solid android:color="@color/white" />
-            <stroke android:width="0dp" android:color="@color/gainsboro_1" />
         </shape>
     </item>
 

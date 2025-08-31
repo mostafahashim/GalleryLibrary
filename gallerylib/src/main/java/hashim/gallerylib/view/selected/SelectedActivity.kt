@@ -15,6 +15,7 @@ import hashim.gallerylib.R
 import hashim.gallerylib.databinding.ActivitySelectedBinding
 import hashim.gallerylib.model.GalleryModel
 import hashim.gallerylib.util.GalleryConstants
+import hashim.gallerylib.util.ScreenSizeUtils
 import hashim.gallerylib.util.dpToPx
 import hashim.gallerylib.util.serializable
 import hashim.gallerylib.view.GalleryBaseActivity
@@ -40,6 +41,14 @@ class SelectedActivity :
             intent.extras?.serializable<ArrayList<GalleryModel>>(GalleryConstants.selected)
                 ?: ArrayList()
         initViewPager()
+        binding.viewModel?.selectedPhotos?.forEach { item ->
+            item.isSelected = false
+        }
+        binding.viewModel?.isItemsMoreThanOne?.value = binding.viewModel?.selectedPhotos?.size!! > 1
+        if (binding.viewModel?.isItemsMoreThanOne?.value == true) {
+            binding.viewModel?.initThumbnailsAdapter(ScreenSizeUtils().getScreenWidth(this))
+            binding.viewModel?.selectOnlyItem(0)
+        }
     }
 
     val pagerAutoScrollHandler = Handler(Looper.getMainLooper())
@@ -93,30 +102,52 @@ class SelectedActivity :
 
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                if (previousPosition != -1 && binding.viewModel?.selectedPhotos!![previousPosition].type.compareTo(
-                        GalleryConstants.GalleryTypeVideos
-                    ) == 0
+
+                val photos = binding.viewModel?.selectedPhotos ?: return
+                if (photos.isEmpty()) return
+
+                // check if prev position inside list
+                if (previousPosition in photos.indices &&
+                    photos[previousPosition].type == GalleryConstants.GalleryTypeVideos
                 ) {
-                    //release player for
-                    binding.viewModel?.selectedPhotos!![previousPosition].isReleasePlayer = true
+                    photos[previousPosition].isReleasePlayer = true
                     binding.viewModel?.selectedPagerAdapter?.notifyItemChanged(previousPosition)
                 }
-                if (binding.viewModel?.selectedPhotos!![position].type.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
-                    binding.viewModel?.selectedPhotos!![position].isReleasePlayer = false
-                    binding.viewModel?.selectedPagerAdapter?.notifyItemChanged(position)
+
+                // check if position inside list
+                if (position in photos.indices) {
+                    if (photos[position].type == GalleryConstants.GalleryTypeVideos) {
+                        photos[position].isReleasePlayer = false
+                        binding.viewModel?.selectedPagerAdapter?.notifyItemChanged(position)
+                    }
+
+                    // hide/show crop button
+                    binding.imgviewCrop.visibility =
+                        if (photos[position].type == GalleryConstants.GalleryTypeImages) {
+                            View.VISIBLE
+                        } else View.GONE
+
+                    // select item
+                    binding.viewModel?.selectOnlyItem(position,true)
+                    previousPosition = position
+                } else {
+                    previousPosition = -1
                 }
-                //set current position to previous
-                previousPosition = position
-                //hide show crop button based on view type
-                binding.imgviewCrop.visibility =
-                    if (binding.viewModel?.selectedPhotos!![binding.viewPagerActivityLanguage.currentItem].type.compareTo(
-                            GalleryConstants.GalleryTypeImages
-                        ) == 0
-                    ) {
-                        View.VISIBLE
-                    } else View.GONE
             }
+
         })
+    }
+
+    override fun animateToPagerPosition(position: Int) {
+        binding.viewPagerActivityLanguage.setCurrentItem(position, true)
+    }
+
+    override fun animateRecyclerViewToPosition(position: Int) {
+        binding.recyclerSelectedItemsThumbnails.scrollToPosition(position)
+    }
+
+    override fun getCurrentPagerPosition(): Int {
+        return binding.viewPagerActivityLanguage.currentItem
     }
 
     override fun setListener() {
