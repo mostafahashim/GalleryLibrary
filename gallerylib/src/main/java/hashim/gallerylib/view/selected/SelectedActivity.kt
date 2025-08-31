@@ -45,10 +45,10 @@ class SelectedActivity :
             item.isSelected = false
         }
         binding.viewModel?.isItemsMoreThanOne?.value = binding.viewModel?.selectedPhotos?.size!! > 1
-        if (binding.viewModel?.isItemsMoreThanOne?.value == true) {
-            binding.viewModel?.initThumbnailsAdapter(ScreenSizeUtils().getScreenWidth(this))
-            binding.viewModel?.selectOnlyItem(0)
-        }
+//        if (binding.viewModel?.isItemsMoreThanOne?.value == true) {
+        binding.viewModel?.initThumbnailsAdapter(ScreenSizeUtils().getScreenWidth(this))
+        binding.viewModel?.selectOnlyItem(0)
+//        }
     }
 
     val pagerAutoScrollHandler = Handler(Looper.getMainLooper())
@@ -128,7 +128,7 @@ class SelectedActivity :
                         } else View.GONE
 
                     // select item
-                    binding.viewModel?.selectOnlyItem(position,true)
+                    binding.viewModel?.selectOnlyItem(position, true)
                     previousPosition = position
                 } else {
                     previousPosition = -1
