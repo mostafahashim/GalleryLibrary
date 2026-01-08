@@ -69,6 +69,7 @@ class GalleryActivity : GalleryBaseActivity(
         binding.viewModel?.columnsNumber?.value =
             intent.getIntExtra(GalleryConstants.gridColumnsCount, 3)
         binding.viewModel?.isOpenEdit = intent.getBooleanExtra(GalleryConstants.isOpenEdit, false)
+        binding.viewModel?.isShowCameraButtons = intent.getBooleanExtra(GalleryConstants.isShowCameraButtons, false)
         binding.viewModel?.showType =
             intent.getStringExtra(GalleryConstants.showType) ?: GalleryConstants.GalleryTypeImages
 

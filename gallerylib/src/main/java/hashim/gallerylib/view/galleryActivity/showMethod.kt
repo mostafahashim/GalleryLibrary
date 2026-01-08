@@ -17,6 +17,7 @@ class GalleryLib(var myActivity: AppCompatActivity) {
     fun showGallery(
         isDialog: Boolean,
         isOpenEdit: Boolean,
+        isShowCameraButtons: Boolean,
         selectionType: String,
         locale: String,
         maxSelectionCount: Int,
@@ -31,6 +32,7 @@ class GalleryLib(var myActivity: AppCompatActivity) {
             val bundle = Bundle()
             bundle.putSerializable(GalleryConstants.selected, selected)
             bundle.putSerializable(GalleryConstants.isOpenEdit, isOpenEdit)
+            bundle.putSerializable(GalleryConstants.isShowCameraButtons, isShowCameraButtons)
             bundle.putSerializable(GalleryConstants.maxSelectionCount, maxSelectionCount)
             bundle.putSerializable(GalleryConstants.gridColumnsCount, gridColumnsCount)
             bundle.putSerializable(GalleryConstants.showType, selectionType)
@@ -52,6 +54,7 @@ class GalleryLib(var myActivity: AppCompatActivity) {
                 return
             Intent(myActivity, GalleryActivity::class.java).also {
                 it.putExtra(GalleryConstants.isOpenEdit, isOpenEdit)
+                it.putExtra(GalleryConstants.isShowCameraButtons, isShowCameraButtons)
                 it.putExtra(GalleryConstants.maxSelectionCount, maxSelectionCount)
                 it.putExtra(GalleryConstants.showType, selectionType)
                 it.putExtra(GalleryConstants.selected, selected)

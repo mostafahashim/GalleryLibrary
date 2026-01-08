@@ -26,6 +26,7 @@ class GalleryViewModel : ViewModel() {
     var showType = ""
     var maxSelectionCount = 10
     var isOpenEdit = false
+    var isShowCameraButtons = false
     var selectedAlbumName = MutableLiveData("")
     var btnDoneVisible = MutableLiveData(false)
     var fromCameraContainer = MutableLiveData(false)
@@ -75,7 +76,10 @@ class GalleryViewModel : ViewModel() {
     }
 
     fun initializeCameraButtons() {
-        if (showType.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
+        if (!isShowCameraButtons) {
+            btnCameraPhotoVisible.value = false
+            btnCameraVideoVisible.value = false
+        } else if (showType.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
             btnCameraPhotoVisible.value = true
             btnCameraVideoVisible.value = false
         } else if (showType.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
@@ -330,19 +334,19 @@ class GalleryViewModel : ViewModel() {
             fromCameraContainer.value = true
             if (showType.compareTo(GalleryConstants.GalleryTypeImages) == 0) {
                 galleryList.addAll(getGalleryPhotos(context))
-                btnCameraPhotoVisible.value = true
-                btnCameraVideoVisible.value = false
+//                btnCameraPhotoVisible.value = true
+//                btnCameraVideoVisible.value = false
             } else if (showType.compareTo(GalleryConstants.GalleryTypeVideos) == 0) {
                 galleryList.addAll(getGalleryVideos(context))
-                btnCameraPhotoVisible.value = false
-                btnCameraVideoVisible.value = true
+//                btnCameraPhotoVisible.value = false
+//                btnCameraVideoVisible.value = true
             } else if (showType.compareTo(GalleryConstants.GalleryTypeImagesAndVideos) == 0) {
                 //get images
                 galleryList.addAll(getGalleryPhotos(context))
                 //get videos
                 galleryList.addAll(getGalleryVideos(context))
-                btnCameraPhotoVisible.value = true
-                btnCameraVideoVisible.value = true
+//                btnCameraPhotoVisible.value = true
+//                btnCameraVideoVisible.value = true
             }
             showHideButtonDone(selectedPhotos.isNotEmpty())
         } catch (e: Exception) {

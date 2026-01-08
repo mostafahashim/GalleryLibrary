@@ -84,7 +84,7 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
         }
         binding.viewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
         binding.viewModel?.observer = this
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
 
@@ -106,6 +106,8 @@ class BottomSheetGalleryFragment : BottomSheetDialogFragment(), GalleryViewModel
             requireArguments().getInt(GalleryConstants.gridColumnsCount, 3)
         binding.viewModel?.isOpenEdit =
             requireArguments().getBoolean(GalleryConstants.isOpenEdit, false)
+        binding.viewModel?.isShowCameraButtons =
+            requireArguments().getBoolean(GalleryConstants.isShowCameraButtons, false)
         binding.viewModel?.showType = requireArguments().getString(
             GalleryConstants.showType,
             GalleryConstants.GalleryTypeImages
